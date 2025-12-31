@@ -1,3 +1,5 @@
 /node_modules/
 
 /blog-api-prisma/node_modules
+
+/blog-api/node_modules
