@@ -1,11 +1,11 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { asyncHandler } from '../../common/utils/asyncHandler.util';
 import { ResponseUtil } from '../../common/utils/response.util';
 import { PaginationUtil } from '../../common/utils/pagination.util';
 import UsersService from './users.service';
 import { MESSAGES } from '../../common/constants/messages.constant';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { ChangePasswordDto } from './dto/change-password.dto';
+import type { UpdateUserDto } from './dto/update-user.dto';
+import type { ChangePasswordDto } from './dto/change-password.dto';
 
 
 export class UsersController {

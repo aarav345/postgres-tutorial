@@ -1,6 +1,6 @@
-import { Response } from 'express';
-import { ApiResponse, PaginatedResponse } from '../types/api-response.interface';
-import { PaginationMeta } from '../types/pagination.interface';
+import type { Response } from 'express';
+import type { ApiResponse, PaginatedResponse } from '../types/api-response.interface';
+import type { PaginationMeta } from '../types/pagination.interface';
 
 export class ResponseUtil {
     static success<T>(

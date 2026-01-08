@@ -1,5 +1,5 @@
 import './common/types/express';
-import express, { Application } from 'express';
+import express, { type Application } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import morgan from 'morgan';

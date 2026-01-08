@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
-import { Role } from '../../generated/prisma';
+import type { Request, Response, NextFunction } from 'express';
+import type { Role } from '../../generated/prisma';
 import { MESSAGES } from '../constants/messages.constant';
 import { UnauthorizedError, ForbiddenError } from '../errors/app.error';
 

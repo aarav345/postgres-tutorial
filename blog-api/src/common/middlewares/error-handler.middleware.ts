@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { Prisma } from '../../generated/prisma';
 import { AppError } from '../errors/app.error';
 
@@ -52,7 +52,9 @@ const errorHandler = (
   }
 
   // Default error
-  const statusCode = (err as any).statusCode || 500;
+  const errorWithStatus = err as Error & { statusCode?: number };
+  const statusCode = typeof errorWithStatus
+                        .statusCode === 'number' ? errorWithStatus.statusCode : 500;
   const message = err.message || 'Internal server error';
 
   return res.status(statusCode).json({

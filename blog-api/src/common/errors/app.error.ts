@@ -5,6 +5,7 @@ export class AppError extends Error {
     public isOperational: boolean = true
   ) {
     super(message);
+    this.name = this.constructor.name; // Better error identification
     Object.setPrototypeOf(this, AppError.prototype);
     Error.captureStackTrace(this, this.constructor);
   }
@@ -19,7 +20,7 @@ export class NotFoundError extends AppError {
 export class ValidationError extends AppError {
   constructor(
     message: string = 'Validation error',
-    public errors?: any
+    public errors?: unknown
   ) {
     super(message, 400);
   }

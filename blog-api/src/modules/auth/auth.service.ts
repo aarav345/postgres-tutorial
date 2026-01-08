@@ -2,11 +2,11 @@ import { BcryptUtil } from '../../common/utils/bcrypt.util';
 import { JwtUtil } from '../../common/utils/jwt.util';
 import { MESSAGES } from '../../common/constants/messages.constant';
 import { UsersService } from '../users/users.service';
-import { RegisterDto } from './dto/register.dto';
-import { AuthResponse } from './interfaces/auth-response.interface';
-import { User } from '../../generated/prisma';
+import type { RegisterDto } from './dto/register.dto';
+import type { AuthResponse } from './interfaces/auth-response.interface';
+import type { User } from '../../generated/prisma';
 import { AppError, UnauthorizedError } from '../../common/errors/app.error';
-import { JwtPayload } from '../../common/types/jwt-payload.interface';
+import type { JwtPayload } from '../../common/types/jwt-payload.interface';
 
 export class AuthService {
   private usersService: UsersService;

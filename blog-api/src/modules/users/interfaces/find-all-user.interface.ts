@@ -1,4 +1,4 @@
-import { UserListItem } from "./user-list-item.interface";
+import type { UserListItem } from "./user-list-item.interface";
 
 export interface FindAllResult {
     users: UserListItem[];

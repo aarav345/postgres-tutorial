@@ -1,4 +1,4 @@
-import { PaginationResult } from '../types/pagination.interface';
+import type { PaginationResult } from '../types/pagination.interface';
 
 export class PaginationUtil {
     static paginate(page: number = 1, limit: number = 10): PaginationResult {

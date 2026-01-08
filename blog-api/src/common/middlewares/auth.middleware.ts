@@ -1,13 +1,13 @@
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { JwtUtil } from '../utils/jwt.util';
 import { MESSAGES } from '../constants/messages.constant';
 import { UnauthorizedError } from '../errors/app.error';
 
-export const authenticate = async (
+export const authenticate = (
     req: Request,
     _res: Response,
     next: NextFunction
-): Promise<void> => {
+): void => {
     try {
         const authHeader = req.headers.authorization;
 

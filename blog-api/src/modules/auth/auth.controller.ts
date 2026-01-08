@@ -1,10 +1,10 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { asyncHandler } from '../../common/utils/asyncHandler.util';
 import { ResponseUtil } from '../../common/utils/response.util';
 import AuthService from './auth.service';
 import { MESSAGES } from '../../common/constants/messages.constant';
-import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
+import type { RegisterDto } from './dto/register.dto';
+import type { LoginDto } from './dto/login.dto';
 
 export class AuthController {
   register = asyncHandler(async (req: Request, res: Response): Promise<void> => {

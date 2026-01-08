@@ -1,13 +1,13 @@
 import UsersRepository from './users.repository';
 import { BcryptUtil } from '../../common/utils/bcrypt.util';
 import { MESSAGES } from '../../common/constants/messages.constant';
-import { User, Prisma, Role } from '../../generated/prisma';
+import type { User, Prisma, Role } from '../../generated/prisma';
 import { NotFoundError, ForbiddenError, AppError } from '../../common/errors/app.error';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { QueryUserDto } from './dto/query-user.dto';
-import { PaginationResult } from '../../common/types/pagination.interface';
-import { FindAllResult } from '@/modules/users/interfaces/find-all-user.interface';
+import type { CreateUserDto } from './dto/create-user.dto';
+import type { UpdateUserDto } from './dto/update-user.dto';
+import type { QueryUserDto } from './dto/query-user.dto';
+import type { PaginationResult } from '../../common/types/pagination.interface';
+import type { FindAllResult } from '@/modules/users/interfaces/find-all-user.interface';
 
 export class UsersService {
     async create(data: CreateUserDto): Promise<User> {

@@ -1,4 +1,4 @@
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T> {
     success: boolean;
     message: string;
     data?: T;
@@ -6,7 +6,7 @@ export interface ApiResponse<T = any> {
     timestamp: string;
 }
 
-export interface PaginatedResponse<T = any> extends ApiResponse<T> {
+export interface PaginatedResponse<T> extends ApiResponse<T> {
     pagination: {
         page: number;
         limit: number;

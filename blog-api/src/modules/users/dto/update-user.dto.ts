@@ -1,4 +1,4 @@
-import { Role } from '../../../generated/prisma';
+import type { Role } from '../../../generated/prisma';
 
 export interface UpdateUserDto {
   email?: string;
