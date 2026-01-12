@@ -1,11 +1,12 @@
 import type { Request, Response } from 'express';
-import { asyncHandler } from '../../common/utils/asyncHandler.util';
-import { ResponseUtil } from '../../common/utils/response.util';
-import { PaginationUtil } from '../../common/utils/pagination.util';
-import UsersService from './users.service';
-import { MESSAGES } from '../../common/constants/messages.constant';
-import type { UpdateUserDto } from './dto/update-user.dto';
-import type { ChangePasswordDto } from './dto/change-password.dto';
+import { asyncHandler } from '../../common/utils/asyncHandler.util.js';
+import { ResponseUtil } from '../../common/utils/response.util.js';
+import { PaginationUtil } from '../../common/utils/pagination.util.js';
+import UsersService from './users.service.js';
+import { MESSAGES } from '../../common/constants/messages.constant.js';
+import type { UpdateUserDto } from './dto/update-user.dto.js';
+import type { ChangePasswordDto } from './dto/change-password.dto.js';
+
 
 
 export class UsersController {
@@ -20,13 +21,13 @@ export class UsersController {
         ...req.query,
     });
 
-    const sanitizedUsers = result.users.map(user => 
-        UsersService.sanitizeUser(user as any)
-    );
+    // const sanitizedUsers = result.users.map(user => 
+    //     UsersService.sanitizeUser(user)
+    // );
 
     ResponseUtil.paginated(
         res,
-        sanitizedUsers,
+        result.users,
         {
             page: result.page,
             limit: result.limit,
@@ -63,32 +64,32 @@ export class UsersController {
   // PUT /api/v1/users/:id - Update user
     updateUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
         const { id } = req.params;
-        const data: UpdateUserDto = req.body;
+        const data = req.body as UpdateUserDto;
         
         const updatedUser = await UsersService.update(
-        Number(id),
-        data,
-        req.user!.id,
-        req.user!.role
+          Number(id),
+          data,
+          req.user!.id,
+          req.user!.role
         );
 
         ResponseUtil.success(
-        res,
-        UsersService.sanitizeUser(updatedUser),
-        MESSAGES.USER.UPDATED
+          res,
+          UsersService.sanitizeUser(updatedUser),
+          MESSAGES.USER.UPDATED
         );
     });
 
   // PUT /api/v1/users/:id/password - Change password
     changePassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
         const { id } = req.params;
-        const { currentPassword, newPassword }: ChangePasswordDto = req.body;
+        const { currentPassword, newPassword } = req.body as ChangePasswordDto;
 
         await UsersService.changePassword(
-        Number(id),
-        currentPassword,
-        newPassword,
-        req.user!.id
+          Number(id),
+          currentPassword,
+          newPassword,
+          req.user!.id
         );
 
         ResponseUtil.success(res, null, MESSAGES.USER.PASSWORD_CHANGED);
@@ -109,14 +110,14 @@ export class UsersController {
         const user = await UsersService.findByUsername(username);
 
         if (!user) {
-        ResponseUtil.error(res, MESSAGES.USER.NOT_FOUND, 404);
+          ResponseUtil.error(res, MESSAGES.USER.NOT_FOUND, 404);
         return;
         }
 
         ResponseUtil.success(
-        res,
-        UsersService.sanitizeUser(user),
-        'User fetched successfully'
+          res,
+          UsersService.sanitizeUser(user),
+          'User fetched successfully'
         );
     });
     }

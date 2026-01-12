@@ -1,12 +1,12 @@
-import { BcryptUtil } from '../../common/utils/bcrypt.util';
-import { JwtUtil } from '../../common/utils/jwt.util';
-import { MESSAGES } from '../../common/constants/messages.constant';
-import { UsersService } from '../users/users.service';
-import type { RegisterDto } from './dto/register.dto';
-import type { AuthResponse } from './interfaces/auth-response.interface';
+import { BcryptUtil } from '../../common/utils/bcrypt.util.js';
+import { JwtUtil } from '../../common/utils/jwt.util.js';
+import { MESSAGES } from '../../common/constants/messages.constant.js';
+import { UsersService } from '../users/users.service.js';
+import type { RegisterDto } from './dto/register.dto.js';
+import type { AuthResponse } from './interfaces/auth-response.interface.js';
 import type { User } from '../../generated/prisma';
-import { AppError, UnauthorizedError } from '../../common/errors/app.error';
-import type { JwtPayload } from '../../common/types/jwt-payload.interface';
+import { AppError, UnauthorizedError } from '../../common/errors/app.error.js';
+import type { JwtPayload } from '../../common/types/jwt-payload.interface.js';
 
 export class AuthService {
   private usersService: UsersService;

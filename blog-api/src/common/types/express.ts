@@ -1,3 +1,6 @@
+
+/* eslint-disable @typescript-eslint/no-namespace */
+
 import type { JwtPayload } from './jwt-payload.interface';
 
 declare global {

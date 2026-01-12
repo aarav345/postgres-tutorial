@@ -68,7 +68,7 @@ export class UsersService {
 
         // Authorization check
         if (requestingUserRole !== 'ADMIN' && user.id !== requestingUserId) {
-        throw new ForbiddenError(MESSAGES.AUTH.FORBIDDEN);
+            throw new ForbiddenError(MESSAGES.AUTH.FORBIDDEN);
         }
 
         // Don't allow changing role unless admin
@@ -88,18 +88,18 @@ export class UsersService {
         const user = await UsersRepository.findById(id);
         
         if (!user) {
-        throw new NotFoundError(MESSAGES.USER.NOT_FOUND);
+            throw new NotFoundError(MESSAGES.USER.NOT_FOUND);
         }
 
         // Only the user themselves can change their password
         if (user.id !== requestingUserId) {
-        throw new ForbiddenError(MESSAGES.AUTH.FORBIDDEN);
+            throw new ForbiddenError(MESSAGES.AUTH.FORBIDDEN);
         }
 
         // Verify current password
         const isPasswordValid = await BcryptUtil.compare(currentPassword, user.password);
         if (!isPasswordValid) {
-        throw new AppError(MESSAGES.USER.INVALID_PASSWORD, 400);
+            throw new AppError(MESSAGES.USER.INVALID_PASSWORD, 400);
         }
 
         // Hash new password
@@ -110,7 +110,7 @@ export class UsersService {
 
     async delete(id: number, requestingUserRole: Role): Promise<User> {
         if (requestingUserRole !== 'ADMIN') {
-        throw new ForbiddenError(MESSAGES.AUTH.FORBIDDEN);
+            throw new ForbiddenError(MESSAGES.AUTH.FORBIDDEN);
         }
 
         await this.findById(id);

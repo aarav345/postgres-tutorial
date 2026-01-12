@@ -4,8 +4,8 @@ import helmet from 'helmet';
 import cors from 'cors';
 import morgan from 'morgan';
 import compression from 'compression';
-import corsConfig from './config/cors.config';
-import routes from './routes';
+import corsConfig from './config/cors.config.js';
+import routes from './routes/index.js';
 import errorHandler from './common/middlewares/error-handler.middleware';
 import { notFound } from './common/middlewares/not-found.middleware';
 

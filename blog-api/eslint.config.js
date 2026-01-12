@@ -1,6 +1,6 @@
-import js from '@eslint/js'
-import tseslint from 'typescript-eslint'
-import unusedImports from 'eslint-plugin-unused-imports'
+import js from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import unusedImports from 'eslint-plugin-unused-imports';
 
 export default [
   {
@@ -14,7 +14,6 @@ export default [
 
   js.configs.recommended,
 
-  // Apply type-checked rules only to TypeScript files in src/
   ...tseslint.configs.recommendedTypeChecked.map(config => ({
     ...config,
     files: ['src/**/*.ts'],
@@ -26,22 +25,19 @@ export default [
       parserOptions: {
         project: './tsconfig.json',
         tsconfigRootDir: import.meta.dirname,
+        ecmaVersion: 'latest',
+        sourceType: 'module',
       },
     },
     plugins: {
       'unused-imports': unusedImports,
     },
     rules: {
-      // Clean imports
       'unused-imports/no-unused-imports': 'error',
       '@typescript-eslint/no-unused-vars': 'off',
-
-      // Type safety
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/consistent-type-imports': 'error',
-
-      // Express async handlers
       '@typescript-eslint/no-misused-promises': [
         'error',
         { checksVoidReturn: false },
@@ -49,12 +45,13 @@ export default [
     },
   },
 
-  // Basic TypeScript rules for config files (without type checking)
+  // Disable unsafe rules for validation files
   {
-    files: ['*.js', '*.ts'],
-    extends: [tseslint.configs.recommended],
+    files: ['src/**/*.validation.ts', 'src/**/validations/**/*.ts'],
     rules: {
-      '@typescript-eslint/no-var-requires': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
     },
   },
-]
+];

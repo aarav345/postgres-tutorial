@@ -1,6 +1,5 @@
 import type { Response } from 'express';
-import type { ApiResponse, PaginatedResponse } from '../types/api-response.interface';
-import type { PaginationMeta } from '../types/pagination.interface';
+import type { PaginationMeta } from '../types/pagination.interface.js';
 
 export class ResponseUtil {
     static success<T>(
@@ -8,12 +7,12 @@ export class ResponseUtil {
         data: T | null = null,
         message: string = 'Success',
         statusCode: number = 200
-    ): Response<ApiResponse<T>> {
-        return res.status(statusCode).json({
-        success: true,
-        message,
-        data,
-        timestamp: new Date().toISOString(),
+    ) : void {
+        res.status(statusCode).json({
+            success: true,
+            message: message,
+            data: data,
+            timestamp: new Date().toISOString(),
         });
     }
 
@@ -21,13 +20,13 @@ export class ResponseUtil {
         res: Response,
         message: string = 'Error',
         statusCode: number = 500,
-        errors: any = null
-    ): Response<ApiResponse> {
-        return res.status(statusCode).json({
-        success: false,
-        message,
-        errors,
-        timestamp: new Date().toISOString(),
+        errors: unknown = null
+    ) : void {
+        res.status(statusCode).json({
+            success: false,
+            message,
+            errors,
+            timestamp: new Date().toISOString(),
         });
     }
 
@@ -36,8 +35,8 @@ export class ResponseUtil {
         data: T,
         pagination: PaginationMeta,
         message: string = 'Success'
-    ): Response<PaginatedResponse<T>> {
-        return res.status(200).json({
+    ) : void {
+        res.status(200).json({
         success: true,
         message,
         data,
