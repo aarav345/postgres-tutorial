@@ -1,12 +1,13 @@
 import type { Role } from '../../generated/prisma';
 
 export interface JwtPayload {
-    id: number;
-    email: string;
-    username: string;
-    role: Role;
+    userId: number;        // Primary identifier
+    email: string;         // For user context
+    role: Role;           // For authorization
 }
 
 export interface RefreshTokenPayload {
-    id: number;
+    userId: number;        // Only identifier
+    tokenVersion?: number; // For invalidation
+    // Absolute minimum - just for refresh
 }

@@ -54,4 +54,22 @@ export default [
       '@typescript-eslint/no-unsafe-assignment': 'off',
     },
   },
+
+  // Disable unsafe rules for service files that use Prisma
+  {
+    files: [
+      'src/**/*.service.ts',
+      'src/**/services/**/*.ts',
+      'src/database/**/*.ts',
+      'src/config/database.ts',
+    ],
+    rules: {
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+    },
+  },
+
+  
 ];

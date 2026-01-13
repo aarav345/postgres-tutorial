@@ -2,19 +2,18 @@ import { Router } from 'express';
 import UsersController from './users.controller';
 import { authenticate } from '../../common/middlewares/auth.middleware';
 import { authorize } from '../../common/middlewares/roles.middleware';
-import { validate } from '../../common/middlewares/validation.middleware';
+import { validate, validateParams, validateQuery } from '../../common/middlewares/validation.middleware';
 import { Role } from '../../generated/prisma';
-import {
-  updateUserValidation,
-  changePasswordValidation,
-  queryUsersValidation,
-  userIdValidation,
-} from './users.validation';
+import { QueryUserSchema } from './dto/query-user.dto';
+import { ChangePasswordDtoSchema } from './dto/change-password.dto';
+import { UserIdSchema } from './dto/user-id.dto';
+import { UpdateUserDtoSchema } from './dto/update-user.dto';
+import { UsernameSchema } from './dto/username.dto';
 
 const router = Router();
 
 // Public routes
-router.get('/username/:username', UsersController.getUserByUsername);
+router.get('/username/:username', validateParams(UsernameSchema), UsersController.getUserByUsername);
 
 // Protected routes (require authentication)
 router.use(authenticate);
@@ -26,43 +25,39 @@ router.get('/me', UsersController.getCurrentUser);
 router.get(
   '/',
   authorize(Role.ADMIN),
-  queryUsersValidation,
-  validate,
+  validateQuery(QueryUserSchema),
   UsersController.getAllUsers
 );
 
 // Get user by ID
 router.get(
   '/:id',
-  userIdValidation,
-  validate,
+  validateParams(UserIdSchema),
   UsersController.getUserById
 );
 
 // Update user
 router.put(
   '/:id',
-  userIdValidation,
-  updateUserValidation,
-  validate,
+  validateParams(UserIdSchema),
+  validate(UpdateUserDtoSchema),
   UsersController.updateUser
 );
 
 // Change password
 router.put(
   '/:id/password',
-  userIdValidation,
-  changePasswordValidation,
-  validate,
+  validateParams(UserIdSchema),
+  validate(ChangePasswordDtoSchema),
   UsersController.changePassword
 );
+
 
 // Delete user (Admin only)
 router.delete(
   '/:id',
   authorize(Role.ADMIN),
-  userIdValidation,
-  validate,
+  validateParams(UserIdSchema),
   UsersController.deleteUser
 );
 

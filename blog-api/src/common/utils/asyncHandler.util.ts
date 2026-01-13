@@ -1,7 +1,17 @@
-import type { Request, Response, NextFunction, RequestHandler } from 'express';
+// asyncHandler.util.ts
+import type { Request, Response, NextFunction } from 'express';
+import type { ValidatedRequest } from '../middlewares/validation.middleware.js';
 
-export const asyncHandler = (fn: RequestHandler): RequestHandler => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    Promise.resolve(fn(req, res, next)).catch(next);
+type AsyncRequestHandler<TBody = undefined, TQuery = undefined, TParams = undefined> = (
+  req: ValidatedRequest<TBody, TQuery, TParams>,
+  res: Response,
+  next: NextFunction
+) => Promise<void>;
+
+export const asyncHandler = <TBody = undefined, TQuery = undefined, TParams = undefined>(
+  fn: AsyncRequestHandler<TBody, TQuery, TParams>
+) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    Promise.resolve(fn(req as ValidatedRequest<TBody, TQuery, TParams>, res, next)).catch(next);
   };
 };

@@ -24,11 +24,32 @@ model User {
   role      Role     @default(USER)
 
   // Relations
-  posts    Post[]
-  comments Comment[]
-  likes    Like[]
+  posts         Post[]
+  comments      Comment[]
+  likes         Like[]
+  refreshTokens RefreshToken[]
 
   @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  family    String   // Token family for rotation tracking
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  used      Boolean  @default(false)
+  usedAt    DateTime?
+  // Security metadata
+  ipAddress String?
+  userAgent String?
+  
+  @@index([userId])
+  @@index([family])
+  @@index([expiresAt])
+  @@map("refreshTokens")
 }
 
 model Category {
@@ -68,17 +89,17 @@ model Post {
   likes    Like[]
   tags     PostTag[]
 
-  @@map("posts")
   @@index([authorId])
   @@index([categoryId])
   @@index([slug])
+  @@map("posts")
 }
 
 model Comment {
-  id              Int      @id @default(autoincrement())
-  content         String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Foreign Keys
   postId          Int
@@ -91,9 +112,9 @@ model Comment {
   parentComment Comment?  @relation("CommentToComment", fields: [parentCommentId], references: [id], onDelete: Cascade)
   replies       Comment[] @relation("CommentToComment")
 
-  @@map("comments")
   @@index([postId])
   @@index([authorId])
+  @@map("comments")
 }
 
 model Like {
@@ -109,9 +130,9 @@ model Like {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([postId, userId])
-  @@map("likes")
   @@index([postId])
   @@index([userId])
+  @@map("likes")
 }
 
 model Tag {

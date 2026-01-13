@@ -1,28 +1,36 @@
+// common/middlewares/auth.middleware.ts
 import type { Request, Response, NextFunction } from 'express';
 import { JwtUtil } from '../utils/jwt.util';
-import { MESSAGES } from '../constants/messages.constant';
-import { UnauthorizedError } from '../errors/app.error';
+import { ResponseUtil } from '../utils/response.util';
 
 export const authenticate = (
     req: Request,
-    _res: Response,
+    res: Response,
     next: NextFunction
 ): void => {
     try {
-        const authHeader = req.headers.authorization;
+    const token = JwtUtil.extractTokenFromHeader(req.headers.authorization);
 
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        throw new UnauthorizedError(MESSAGES.AUTH.TOKEN_REQUIRED);
-        }
+    if (!token) {
+        ResponseUtil.error(res, 'Access token is required', 401);
+        return;
+    }
 
-        const token = authHeader.substring(7);
-        const decoded = JwtUtil.verifyAccessToken(token);
+    const decoded = JwtUtil.verifyAccessToken(token);
+    
+    // Attach user info to request
+    req.user = {
+        userId: decoded.userId,
+        email: decoded.email,
+        role: decoded.role,
+    };
 
-        req.user = decoded;
-        next();
+    next();
     } catch (error) {
-        next(new UnauthorizedError(MESSAGES.AUTH.TOKEN_INVALID));
+        if (error instanceof Error) {
+            ResponseUtil.error(res, error.message, 401);
+        } else {
+            ResponseUtil.error(res, 'Authentication failed', 401);
+        }
     }
 };
-
-
