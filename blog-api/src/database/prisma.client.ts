@@ -1,35 +1,25 @@
+import "dotenv/config";
+import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from "../generated/prisma/index.js";
-import { PrismaPg } from '@prisma/adapter-pg';
-import { Pool } from 'pg';
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
-  pool: Pool | undefined;
 };
 
-// Create a connection pool
-const pool = globalForPrisma.pool ?? new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
+const connectionString = `${process.env.DATABASE_URL}`
+const adapter = new PrismaPg({ connectionString });
 
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.pool = pool;
-}
-
-// Create the adapter
-const adapter = new PrismaPg(pool);
-
-// Create Prisma Client with adapter
 const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
     adapter,
-    log: process.env.NODE_ENV === 'development' 
-      ? ['query', 'warn', 'error'] 
-      : ['error'],
+    log:
+      process.env.NODE_ENV === "development"
+        ? ["query", "warn", "error"]
+        : ["error"],
   });
 
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
 }
 

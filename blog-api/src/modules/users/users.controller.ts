@@ -56,7 +56,7 @@ export class UsersController {
   // GET /api/v1/users/me - Get current user profile
   getCurrentUser = asyncHandler(
     async (req, res): Promise<void> => {
-      const user = await UsersService.findById(req.user!.id);
+      const user = await UsersService.findById(req.user!.userId);
       
       ResponseUtil.success(
         res,
@@ -75,7 +75,7 @@ export class UsersController {
       const updatedUser = await UsersService.update(
         Number(id),
         data,
-        req.user!.id,
+        req.user!.userId,
         req.user!.role
       );
 
@@ -97,7 +97,7 @@ export class UsersController {
         Number(id),
         currentPassword,
         newPassword,
-        req.user!.id
+        Number(req.user!.userId)
       );
 
       ResponseUtil.success(res, null, MESSAGES.USER.PASSWORD_CHANGED);

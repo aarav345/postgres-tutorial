@@ -114,7 +114,7 @@ export class AuthService {
     });
 
     if (token) {
-      await RefreshTokenService.revokeTokenFamily(token.family as string);
+      await RefreshTokenService.revokeTokenFamily(token.family);
     }
   }
 

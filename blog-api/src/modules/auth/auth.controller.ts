@@ -4,8 +4,10 @@ import AuthService from './auth.service.js';
 import { MESSAGES } from '../../common/constants/messages.constant.js';
 import type { RegisterDto } from './dto/register.dto.js';
 import type { LoginDto } from './dto/login.dto.js';
-import type { RefreshTokenDto } from './dto/refresh-token.dto.js';
 import { JwtUtil } from '@/common/utils/jwt.util.js';
+import { AppError } from '@/common/errors/app.error.js';
+import { RefreshTokenService } from './token.service.js';
+
 
 export class AuthController {
   register = asyncHandler<RegisterDto, undefined, undefined>(
@@ -31,44 +33,43 @@ export class AuthController {
     }
   );
 
-  refreshToken = asyncHandler<RefreshTokenDto, undefined, undefined>(
-    async (req, res): Promise<void> => {
-      const { refreshToken } = req.validatedBody;
-      const metadata = JwtUtil.extractMetadata(req);
-      const result = await AuthService.refreshTokens(refreshToken, metadata);
-      ResponseUtil.success(res, result, 'Token refreshed successfully');
-    }
-  );
-
 
     /**
    * Refresh - Controller just handles HTTP layer
    */
-  // static async refresh(req: Request, res: Response, next: NextFunction) {
-  //   try {
-  //     const oldRefreshToken = JwtUtil.getRefreshTokenFromCookie(req);
+  refresh = asyncHandler(
+    async (req, res): Promise<void> => {
+      const oldRefreshToken = JwtUtil.getRefreshTokenFromCookie(req);
 
-  //     if (!oldRefreshToken) {
-  //       throw new AppError('Refresh token not found', 401);
-  //     }
+      if (!oldRefreshToken) {
+        throw new AppError('Refresh token not found', 401);
+      }
 
-  //     const metadata = JwtUtil.extractMetadata(req);
+      const metadata = JwtUtil.extractMetadata(req);
 
-  //     // Service does all the business logic
-  //     const result = await AuthService.refreshTokens(oldRefreshToken, metadata);
+      try {
+        // Service does all the business logic
+        const result = await AuthService.refreshTokens(oldRefreshToken, metadata);
 
-  //     // Controller handles HTTP response
-  //     JwtUtil.setRefreshTokenCookie(res, result.refreshToken);
+        // Set new refresh token in cookie
+        JwtUtil.setRefreshTokenCookie(res, result.refreshToken);
 
-  //     res.json({
-  //       accessToken: result.accessToken,
-  //       user: result.user,
-  //     });
-  //   } catch (error) {
-  //     JwtUtil.clearRefreshTokenCookie(res);
-  //     next(error);
-  //   }
-  // }
+        // Return new access token
+        ResponseUtil.success(
+          res,
+          {
+            accessToken: result.accessToken,
+            user: result.user,
+          },
+          MESSAGES.AUTH.REFRESH_SUCCESS
+        );
+      } catch (error) {
+        // Clear cookie on error
+        JwtUtil.clearRefreshTokenCookie(res);
+        throw error;
+      }
+    }
+  );
 
   logout = asyncHandler(
     async (req, res): Promise<void> => {
@@ -81,6 +82,61 @@ export class AuthController {
       JwtUtil.clearRefreshTokenCookie(res);
 
       ResponseUtil.success(res, null, MESSAGES.AUTH.LOGOUT_SUCCESS);
+    }
+  );
+
+
+
+  /**
+   * Logout from all devices
+   */
+  logoutAll = asyncHandler(
+    async (req, res): Promise<void> => {
+      const userId = req.user?.userId;
+
+      if (!userId) {
+        throw new AppError('Unauthorized', 401);
+      }
+
+      await AuthService.logoutAll(userId);
+      JwtUtil.clearRefreshTokenCookie(res);
+
+      ResponseUtil.success(res, null, MESSAGES.AUTH.LOGOUT_ALL_SUCCESS);
+    }
+  );
+
+  /**
+   * Get active sessions for current user
+   */
+  getSessions = asyncHandler(
+    async (req, res): Promise<void> => {
+      const userId = req.user?.userId;
+
+      if (!userId) {
+        throw new AppError('Unauthorized', 401);
+      }
+
+      const sessions = await RefreshTokenService.getUserSessions(userId);
+
+      ResponseUtil.success(res, { sessions }, 'Sessions retrieved successfully');
+    }
+  );
+
+  /**
+   * Revoke specific session by family ID
+   */
+  revokeSession = asyncHandler(
+    async (req, res): Promise<void> => {
+      const userId = req.user?.userId;
+      const { family } = req.params;
+
+      if (!userId) {
+        throw new AppError('Unauthorized', 401);
+      }
+
+      await RefreshTokenService.revokeSession(userId, family);
+
+      ResponseUtil.success(res, null, 'Session revoked successfully');
     }
   );
 

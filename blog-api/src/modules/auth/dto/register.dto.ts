@@ -1,10 +1,3 @@
-// export interface RegisterDto {
-//     email: string;
-//     username: string;
-//     password: string;
-// }
-
-
 import {z} from  "zod";
 
 export const RegisterSchema = z.object({

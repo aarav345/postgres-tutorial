@@ -5,6 +5,7 @@ import jwtConfig from '../../config/jwt.config.js';
 import type { JwtPayload } from '../types/jwt-payload.interface.js';
 import { AppError } from '../errors/app.error.js';
 
+
 export class JwtUtil {
     private static readonly REFRESH_TOKEN_COOKIE_NAME = 'refreshToken';
     
@@ -69,11 +70,19 @@ export class JwtUtil {
         );
     }
 
+
     /**
      * Get refresh token from cookie
      */
     static getRefreshTokenFromCookie(req: Request): string | undefined {
-        return req.cookies?.[this.REFRESH_TOKEN_COOKIE_NAME] as string | undefined;
+
+        if (!req.cookies) return undefined;
+
+        const token: unknown = req.cookies[this.REFRESH_TOKEN_COOKIE_NAME];
+
+        if (typeof token === 'string') return token;
+
+        return undefined;
     }
 
     /**
@@ -93,8 +102,8 @@ export class JwtUtil {
      */
     static extractMetadata(req: Request): { ipAddress?: string; userAgent?: string } {
         return {
-        ipAddress: (req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress) as string,
-        userAgent: req.headers['user-agent'],
+            ipAddress: (req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress) as string,
+            userAgent: req.headers['user-agent'],
         };
     }
 }

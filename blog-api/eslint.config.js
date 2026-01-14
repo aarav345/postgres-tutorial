@@ -62,6 +62,7 @@ export default [
       'src/**/services/**/*.ts',
       'src/database/**/*.ts',
       'src/config/database.ts',
+      'src/scripts/test-connection.ts',
     ],
     rules: {
       '@typescript-eslint/no-unsafe-call': 'off',

@@ -1,5 +1,3 @@
-// prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -9,43 +7,35 @@ datasource db {
   provider = "postgresql"
 }
 
-enum Role {
-  ADMIN
-  USER
-}
-
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  username  String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  role      Role     @default(USER)
-
-  // Relations
-  posts         Post[]
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  username      String         @unique
+  password      String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  role          Role           @default(USER)
   comments      Comment[]
   likes         Like[]
+  posts         Post[]
   refreshTokens RefreshToken[]
 
   @@map("users")
 }
 
 model RefreshToken {
-  id        String   @id @default(uuid())
-  token     String   @unique
+  id        String    @id @default(uuid())
+  token     String    @unique
   userId    Int
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  family    String   // Token family for rotation tracking
+  family    String
   expiresAt DateTime
-  createdAt DateTime @default(now())
-  used      Boolean  @default(false)
+  createdAt DateTime  @default(now())
+  used      Boolean   @default(false)
   usedAt    DateTime?
-  // Security metadata
   ipAddress String?
   userAgent String?
-  
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
   @@index([family])
   @@index([expiresAt])
@@ -58,9 +48,7 @@ model Category {
   slug        String   @unique
   description String?
   createdAt   DateTime @default(now())
-
-  // Relations
-  posts Post[]
+  posts       Post[]
 
   @@map("categories")
 }
@@ -77,17 +65,13 @@ model Post {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   viewCount   Int       @default(0)
-
-  // Foreign Keys
-  authorId   Int
-  categoryId Int?
-
-  // Relations
-  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  comments Comment[]
-  likes    Like[]
-  tags     PostTag[]
+  authorId    Int
+  categoryId  Int?
+  comments    Comment[]
+  likes       Like[]
+  tags        PostTag[]
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  category    Category? @relation(fields: [categoryId], references: [id])
 
   @@index([authorId])
   @@index([categoryId])
@@ -96,21 +80,17 @@ model Post {
 }
 
 model Comment {
-  id        Int      @id @default(autoincrement())
-  content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Foreign Keys
+  id              Int       @id @default(autoincrement())
+  content         String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
   postId          Int
   authorId        Int
   parentCommentId Int?
-
-  // Relations
-  post          Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user          User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  parentComment Comment?  @relation("CommentToComment", fields: [parentCommentId], references: [id], onDelete: Cascade)
-  replies       Comment[] @relation("CommentToComment")
+  user            User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parentComment   Comment?  @relation("CommentToComment", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  replies         Comment[] @relation("CommentToComment")
+  post            Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@index([postId])
   @@index([authorId])
@@ -120,14 +100,10 @@ model Comment {
 model Like {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
-
-  // Foreign Keys
-  postId Int
-  userId Int
-
-  // Relations
-  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId    Int
+  userId    Int
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([postId, userId])
   @@index([postId])
@@ -136,13 +112,11 @@ model Like {
 }
 
 model Tag {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  slug      String   @unique
-  createdAt DateTime @default(now())
-
-  // Relations
-  posts PostTag[]
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  slug      String    @unique
+  createdAt DateTime  @default(now())
+  posts     PostTag[]
 
   @@map("tags")
 }
@@ -150,10 +124,14 @@ model Tag {
 model PostTag {
   postId Int
   tagId  Int
-
-  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
-  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([postId, tagId])
   @@map("post_tags")
+}
+
+enum Role {
+  ADMIN
+  USER
 }

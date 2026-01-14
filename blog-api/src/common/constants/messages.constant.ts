@@ -8,6 +8,11 @@ export const MESSAGES = {
     TOKEN_REQUIRED: 'Authentication token required',
     UNAUTHORIZED: 'Unauthorized access',
     FORBIDDEN: 'Forbidden - Insufficient permissions',
+    PASSWORD_CHANGED: 'Password changed successfully',
+    INVALID_PASSWORD: 'Current password is incorrect',
+    REFRESH_SUCCESS: 'Refresh token generated successfully',
+    LOGOUT_ALL_SUCCESS: 'Logged out from all devices successfully',
+
   },
   USER: {
     CREATED: 'User created successfully',

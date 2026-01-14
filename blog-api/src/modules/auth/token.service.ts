@@ -77,7 +77,7 @@ export class RefreshTokenService {
         // Generate new token in the same family
         const newToken = await this.createRefreshToken(
             Number(storedToken.userId),
-            storedToken.family as string,
+            storedToken.family,
             metadata
         )
 
