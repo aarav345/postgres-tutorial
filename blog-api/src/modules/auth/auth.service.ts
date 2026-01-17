@@ -59,7 +59,6 @@ export class AuthService {
     // Generate access tokens
     const accessToken = JwtUtil.generateAccessToken({
       userId: user.id,
-      email: user.email,
       role: user.role,
     });
 
@@ -90,7 +89,6 @@ export class AuthService {
     // 2. Generate new access token
     const accessToken = JwtUtil.generateAccessToken({
       userId: userId,
-      email: user.email,
       role: user.role,
     });
 

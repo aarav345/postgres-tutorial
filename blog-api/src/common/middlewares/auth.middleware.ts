@@ -21,7 +21,6 @@ export const authenticate = (
     // Attach user info to request
     req.user = {
         userId: decoded.userId,
-        email: decoded.email,
         role: decoded.role,
     };
 

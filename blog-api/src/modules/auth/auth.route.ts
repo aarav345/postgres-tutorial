@@ -9,8 +9,8 @@ const router = Router();
 
 router.post('/register', validate(RegisterSchema), AuthController.register);
 router.post('/login', validate(LoginSchema), AuthController.login);
-router.post('/refresh', AuthController.refresh);
-router.post('/logout', AuthController.logout);
+router.get('/refresh', AuthController.refresh);
+router.get('/logout', AuthController.logout);
 
 router.post('/logout-all', authenticate, AuthController.logoutAll);
 router.get('/sessions', authenticate, AuthController.getSessions);

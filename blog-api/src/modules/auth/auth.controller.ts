@@ -29,7 +29,7 @@ export class AuthController {
       // Controller handles HTTP response
       JwtUtil.setRefreshTokenCookie(res, result.refreshToken);
 
-      ResponseUtil.success(res, result, MESSAGES.AUTH.LOGIN_SUCCESS);
+      ResponseUtil.success(res, { user: result.user, accessToken: result.accessToken }, MESSAGES.AUTH.LOGIN_SUCCESS);
     }
   );
 

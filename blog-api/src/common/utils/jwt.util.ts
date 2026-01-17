@@ -26,9 +26,9 @@ export class JwtUtil {
         };
 
         return jwt.sign(
-        payload,
-        jwtConfig.accessTokenSecret as Secret,
-        options
+            payload,
+            jwtConfig.accessTokenSecret as Secret,
+            options
         );
     }
 
@@ -37,7 +37,7 @@ export class JwtUtil {
      */
     static verifyAccessToken(token: string): JwtPayload {
         try {
-        return jwt.verify(token, jwtConfig.accessTokenSecret) as JwtPayload;
+            return jwt.verify(token, jwtConfig.accessTokenSecret) as JwtPayload;
         } catch (error) {
         if (error instanceof jwt.TokenExpiredError) {
             throw new AppError('Access token has expired', 401);
