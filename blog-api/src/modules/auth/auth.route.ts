@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import AuthController from './auth.controller.js';
-import { validate } from '../../common/middlewares/validation.middleware.js';
+import { validate, validateParams } from '../../common/middlewares/validation.middleware.js';
 import { RegisterSchema } from './dto/register.dto.js';
 import { LoginSchema } from './dto/login.dto.js';
 import { authenticate } from '@/common/middlewares/auth.middleware.js';
+import { familySchema } from './dto/family.dto.js';
 
 const router = Router();
 
@@ -14,6 +15,6 @@ router.get('/logout', AuthController.logout);
 
 router.post('/logout-all', authenticate, AuthController.logoutAll);
 router.get('/sessions', authenticate, AuthController.getSessions);
-router.delete('/sessions/:family', authenticate, AuthController.revokeSession);
+router.delete('/sessions/:family', authenticate, validateParams(familySchema), AuthController.revokeSession);
 
 export default router;

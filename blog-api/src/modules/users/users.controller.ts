@@ -8,6 +8,9 @@ import type { ChangePasswordDto } from './dto/change-password.dto.js';
 import type { QueryUserDto } from './dto/query-user.dto.js';
 import type { UserIdDto } from './dto/user-id.dto.js';
 import type { UsernameDto } from './dto/username.dto.js';
+import AuthService from '../auth/auth.service.js';
+import { JwtUtil } from '@/common/utils/jwt.util.js';
+
 
 
 
@@ -100,6 +103,9 @@ export class UsersController {
         Number(req.user!.userId)
       );
 
+      await AuthService.logoutAll(Number(req.user!.userId));
+      JwtUtil.clearRefreshTokenCookie(res);
+
       ResponseUtil.success(res, null, MESSAGES.USER.PASSWORD_CHANGED);
     }
   );
@@ -118,7 +124,7 @@ export class UsersController {
   // GET /api/v1/users/username/:username - Get user by username
   getUserByUsername = asyncHandler<undefined, undefined, UsernameDto>(
     async (req, res): Promise<void> => {
-      const { username } = req.params;
+      const { username } = req.validatedParams;
       const user = await UsersService.findByUsername(username);
 
       if (!user) {

@@ -71,10 +71,10 @@ export class UsersRepository {
             createdAt: true,
             updatedAt: true,
             _count: {
-            select: {
-                posts: true,
-                comments: true,
-            },
+              select: {
+                  posts: true,
+                  comments: true,
+              },
             },
         },
         orderBy: {

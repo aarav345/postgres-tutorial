@@ -17,7 +17,7 @@ export class UsersService {
     async findById(id: number): Promise<User> {
         const user = await UsersRepository.findById(id);
         if (!user) {
-        throw new NotFoundError(MESSAGES.USER.NOT_FOUND);
+            throw new NotFoundError(MESSAGES.USER.NOT_FOUND);
         }
         return user;
     }
@@ -44,10 +44,10 @@ export class UsersService {
         }
         
         if (search) {
-        where.OR = [
-            { email: { contains: search, mode: 'insensitive' } },
-            { username: { contains: search, mode: 'insensitive' } },
-        ];
+            where.OR = [
+                { email: { contains: search, mode: 'insensitive' } },
+                { username: { contains: search, mode: 'insensitive' } },
+            ];
         }
 
         const [users, total] = await Promise.all([
@@ -73,7 +73,7 @@ export class UsersService {
 
         // Don't allow changing role unless admin
         if (data.role && requestingUserRole !== 'ADMIN') {
-        delete data.role;
+            throw new ForbiddenError(MESSAGES.AUTH.FORBIDDEN);
         }
 
         return UsersRepository.update(id, data);
@@ -105,7 +105,7 @@ export class UsersService {
         // Hash new password
         const hashedPassword = await BcryptUtil.hash(newPassword);
 
-        return UsersRepository.update(id, { password: hashedPassword });
+        return UsersRepository.update(id, { password: hashedPassword, passwordChangedAt: new Date() });
     }
 
     async delete(id: number, requestingUserRole: Role): Promise<User> {

@@ -22,6 +22,9 @@ export const MESSAGES = {
     ALREADY_EXISTS: 'User already exists',
     PASSWORD_CHANGED: 'Password changed successfully',
     INVALID_PASSWORD: 'Current password is incorrect',
+    CANNOT_CHANGE_ROLE: 'Cannot change user role',
+    INCORRECT_PASSWORD: 'Incorrect Current password',
+    INSUFFICIENT_PERMISSIONS: 'Insufficient permissions',
   },
   GENERAL: {
     SUCCESS: 'Operation successful',

@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2023",
     "module": "ESNext",
-    "lib": ["ES2022"],
+    "lib": ["ES2023"],
     "moduleResolution": "node",
     "outDir": "./dist",
     "rootDir": "./src",
@@ -28,10 +28,11 @@
       "@modules/*": ["src/modules/*"],
       "@database/*": ["src/database/*"]
     },
-    "typeRoots": ["./node_modules/@types", "./src/common/types"]
+    "typeRoots": ["./node_modules/@types", "./src/common/types"],
+    "types": ["node", "vitest/globals"]
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "tests"],
+  "exclude": ["node_modules", "dist", "tests", "**/*.test.ts", "**/*.spec.ts", "coverage"],
   "ts-node": {
     "esm": true,
     "experimentalSpecifierResolution": "node"

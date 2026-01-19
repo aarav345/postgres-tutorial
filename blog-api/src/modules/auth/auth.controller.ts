@@ -7,6 +7,7 @@ import type { LoginDto } from './dto/login.dto.js';
 import { JwtUtil } from '@/common/utils/jwt.util.js';
 import { AppError } from '@/common/errors/app.error.js';
 import { RefreshTokenService } from './token.service.js';
+import type { familyDto } from './dto/family.dto.js';
 
 
 export class AuthController {
@@ -125,10 +126,10 @@ export class AuthController {
   /**
    * Revoke specific session by family ID
    */
-  revokeSession = asyncHandler(
+  revokeSession = asyncHandler<undefined, undefined, familyDto>(
     async (req, res): Promise<void> => {
       const userId = req.user?.userId;
-      const { family } = req.params;
+      const { family } = req.validatedParams;
 
       if (!userId) {
         throw new AppError('Unauthorized', 401);
