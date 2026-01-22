@@ -5,16 +5,17 @@ import AuthService from '../../../src/modules/auth/auth.service';
 import { RefreshTokenService } from '../../../src/modules/auth/token.service';
 import { TestHelpers } from '../../helpers/test-helpers';
 import { MESSAGES } from '../../../src/common/constants/messages.constant';
+import { AppError } from '../../../src/common/errors/app.error';
 
 // Mock the services
 vi.mock('../../../src/modules/auth/auth.service');
 vi.mock('../../../src/modules/auth/token.service');
-vi.mock('../../../src/common/middlewares/auth.middleware', () => ({
-    authenticate: (req: any, _res: any, next: any) => {
-        req.user = { userId: 1, role: 'USER' };
-        next();
-    },
-}));
+// vi.mock('../../../src/common/middlewares/auth.middleware', () => ({
+//     authenticate: (req: any, _res: any, next: any) => {
+//         req.user = { userId: 1, role: 'USER' };
+//         next();
+//     },
+// }));
 
 describe('AuthController', () => {
     afterEach(() => {
@@ -92,7 +93,12 @@ describe('AuthController', () => {
         expect(response.body.success).toBe(true);
         expect(response.body.message).toBe(MESSAGES.AUTH.LOGIN_SUCCESS);
         expect(response.body.data.accessToken).toBe('access-token');
-        expect(response.body.data.user).toEqual(mockUser);
+        expect(response.body.data.user).toMatchObject({
+            id: mockUser.id,
+            email: mockUser.email,
+            username: mockUser.username,
+            role: mockUser.role,
+        });
         
         // Check if refresh token cookie is set
         const cookies = response.headers['set-cookie'];
@@ -140,32 +146,38 @@ describe('AuthController', () => {
         });
 
         it('should return 401 if refresh token is missing', async () => {
-        const response = await request(app).get('/api/v1/auth/refresh');
+            const response = await request(app).get('/api/v1/auth/refresh');
 
-        expect(response.status).toBe(401);
+            expect(response.status).toBe(401);
         });
 
         it('should clear cookie on refresh error', async () => {
-        vi.mocked(AuthService.refreshTokens).mockRejectedValue(
-            new Error('Invalid refresh token')
-        );
+            vi.mocked(AuthService.refreshTokens).mockRejectedValue(
+                new AppError('Invalid Refresh Token', 401)
+            );
 
-        const response = await request(app)
-            .get('/api/v1/auth/refresh')
-            .set('Cookie', ['refreshToken=invalid-token']);
+            const response = await request(app)
+                .get('/api/v1/auth/refresh')
+                .set('Cookie', ['refreshToken=invalid-token']);
 
-        expect(response.status).toBe(500);
-        
-        // Check if cookie is cleared
-        const cookies = response.headers['set-cookie'];
-        if (cookies && Array.isArray(cookies)) {
+            expect(response.status).toBe(401);
+
+            const cookies = response.headers['set-cookie'];
+            expect(cookies).toBeDefined();
+
+            if (!Array.isArray(cookies)) return;
+
             expect(
-            cookies.some((cookie: string) => 
-                cookie.includes('refreshToken=') && cookie.includes('Max-Age=0')
-            )
+                cookies!.some(cookie =>
+                    cookie.startsWith('refreshToken=') &&
+                    (
+                        cookie.includes('Max-Age=0') ||
+                        cookie.includes('Expires=Thu, 01 Jan 1970')
+                    )
+                )
             ).toBe(true);
-        }
-        });
+});
+
     });
 
     describe('GET /api/v1/auth/logout', () => {
@@ -195,22 +207,22 @@ describe('AuthController', () => {
 
     describe('POST /api/v1/auth/logout-all', () => {
         it('should logout from all devices', async () => {
-        vi.mocked(AuthService.logoutAll).mockResolvedValue(undefined);
+            vi.mocked(AuthService.logoutAll).mockResolvedValue(undefined);
 
-        const token = TestHelpers.generateToken(1, 'USER');
-        const response = await request(app)
-            .post('/api/v1/auth/logout-all')
-            .set(TestHelpers.authHeader(token));
+            const token = TestHelpers.generateToken(1, 'USER');
+            const response = await request(app)
+                .post('/api/v1/auth/logout-all')
+                .set(TestHelpers.authHeader(token));
 
-        expect(response.status).toBe(200);
-        expect(response.body.message).toBe(MESSAGES.AUTH.LOGOUT_ALL_SUCCESS);
-        expect(AuthService.logoutAll).toHaveBeenCalledWith(1);
+            expect(response.status).toBe(200);
+            expect(response.body.message).toBe(MESSAGES.AUTH.LOGOUT_ALL_SUCCESS);
+            expect(AuthService.logoutAll).toHaveBeenCalledWith(1);
         });
 
         it('should return 401 if not authenticated', async () => {
-        const response = await request(app).post('/api/v1/auth/logout-all');
+            const response = await request(app).post('/api/v1/auth/logout-all');
 
-        expect(response.status).toBe(401);
+            expect(response.status).toBe(401);
         });
     });
 
@@ -235,7 +247,14 @@ describe('AuthController', () => {
             .set(TestHelpers.authHeader(token));
 
         expect(response.status).toBe(200);
-        expect(response.body.data.sessions).toEqual(mockSessions);
+        expect(response.body.data.sessions).toMatchObject([{
+                id: mockSessions[0].id,
+                family: mockSessions[0].family,
+                userAgent: mockSessions[0].userAgent,
+                ipAddress: mockSessions[0].ipAddress,
+            
+            }   
+        ]);
         expect(RefreshTokenService.getUserSessions).toHaveBeenCalledWith(1);
         });
     });

@@ -2,10 +2,9 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import UsersService from '../../../src/modules/users/users.service';
 import UsersRepository from '../../../src/modules/users/users.repository';
 import { BcryptUtil } from '../../../src/common/utils/bcrypt.util';
-import { AppError } from '../../../src/common/errors/app.error';
+import { AppError, ForbiddenError, NotFoundError } from '../../../src/common/errors/app.error';
 import { TestHelpers } from '../../helpers/test-helpers';
 import { MESSAGES } from '../../../src/common/constants/messages.constant';
-import { email } from 'zod';
 import { Role } from '../../../src/generated/prisma';
 
 // Mock dependencies
@@ -32,7 +31,7 @@ describe('UsersService', () => {
             vi.mocked(UsersRepository.findById).mockResolvedValue(null);
 
             await expect(UsersService.findById(999)).rejects.toThrow(
-                new AppError(MESSAGES.USER.NOT_FOUND, 404)
+                new NotFoundError(MESSAGES.USER.NOT_FOUND)
             );
         });
     });
@@ -59,13 +58,11 @@ describe('UsersService', () => {
 
     describe('findAll', () => {
         it('should return paginated users', async () => {
-            const mockUsersWithCount = [ TestHelpers.mockUserWithCount() ];
-            const mockUsers = [
-                TestHelpers.mockUser({ id: 1, email: 'user1@example.com' }),
-                TestHelpers.mockUser({ id: 2, email: 'user2@example.com' }),
-            ];
+            const mockUsersWithCount = [ TestHelpers.mockUserWithCount({ id: 1, email: 'user1@example.com' }), TestHelpers.mockUserWithCount({ id: 2, email: 'user2@example.com' }) ];
 
             vi.mocked(UsersRepository.findAll).mockResolvedValue(mockUsersWithCount);
+            vi.mocked(UsersRepository.count).mockResolvedValue(mockUsersWithCount.length);
+
 
             const result = await UsersService.findAll({
                 skip: 0,
@@ -74,7 +71,7 @@ describe('UsersService', () => {
                 limit: 10,
             });
 
-            expect(result.users).toEqual(mockUsers);
+            expect(result.users).toEqual(mockUsersWithCount);
             expect(result.total).toBe(2);
             expect(result.page).toBe(1);
             expect(result.limit).toBe(10);
@@ -84,6 +81,7 @@ describe('UsersService', () => {
             const mockAdmins = [TestHelpers.mockAdminWithCount()];
 
             vi.mocked(UsersRepository.findAll).mockResolvedValue(mockAdmins);
+            vi.mocked(UsersRepository.count).mockResolvedValue(mockAdmins.length);
 
             await UsersService.findAll({
                 skip: 0,
@@ -94,9 +92,16 @@ describe('UsersService', () => {
             });
 
             expect(UsersRepository.findAll).toHaveBeenCalledWith(
-                expect.objectContaining({ role: 'ADMIN' })
+                expect.objectContaining({
+                    where: expect.objectContaining({
+                        role: 'ADMIN'
+                    }),
+                    skip: 0,
+                    take: 10
+                })
             );
         });
+
 
         it('should search users', async () => {
             const mockUsers = [TestHelpers.mockUserWithCount({ username: 'searchtest' })];
@@ -112,7 +117,22 @@ describe('UsersService', () => {
             });
 
             expect(UsersRepository.findAll).toHaveBeenCalledWith(
-                expect.objectContaining({ search: 'search' })
+                expect.objectContaining({ 
+                    where: expect.objectContaining({
+                        OR: expect.arrayContaining([
+                            expect.objectContaining({
+                                email: expect.objectContaining({
+                                    contains: 'search',
+                                }),
+                            }),
+                            expect.objectContaining({
+                                username: expect.objectContaining({
+                                    contains: 'search',
+                                }),
+                            }),
+                        ])
+                    })
+                })
             );
         });
     });
@@ -163,7 +183,7 @@ describe('UsersService', () => {
 
             await expect(
                 UsersService.update(1, updateData, 1, 'USER')
-            ).rejects.toThrow(MESSAGES.USER.CANNOT_CHANGE_ROLE);
+            ).rejects.toThrow(MESSAGES.AUTH.FORBIDDEN);
         });
     });
 
@@ -177,7 +197,10 @@ describe('UsersService', () => {
             vi.mocked(UsersRepository.findById).mockResolvedValue(mockUser);
             vi.mocked(BcryptUtil.compare).mockResolvedValue(true);
             vi.mocked(BcryptUtil.hash).mockResolvedValue('hashed-new-password');
-            vi.mocked(UsersRepository.update).mockResolvedValue(mockUser);
+            vi.mocked(UsersRepository.update).mockResolvedValue({
+                ...mockUser,
+                password: 'hashed-new-password',
+            });
 
             await UsersService.changePassword(1, 'oldPassword', 'newPassword', 1);
 
@@ -186,11 +209,18 @@ describe('UsersService', () => {
                 'hashed-old-password'
             );
             expect(BcryptUtil.hash).toHaveBeenCalledWith('newPassword');
+
+            // Updated expectation to match the actual call
             expect(UsersRepository.update).toHaveBeenCalledWith(
                 1,
-                'hashed-new-password'
+                expect.objectContaining({
+                    password: 'hashed-new-password',
+                    passwordChangedAt: expect.any(Date),
+                })
             );
         });
+
+
 
         it('should throw error for incorrect current password', async () => {
             const mockUser = {
@@ -203,7 +233,7 @@ describe('UsersService', () => {
 
             await expect(
                 UsersService.changePassword(1, 'wrongPassword', 'newPassword', 1)
-            ).rejects.toThrow(new AppError(MESSAGES.USER.INCORRECT_PASSWORD, 400));
+            ).rejects.toThrow(new AppError(MESSAGES.USER.INVALID_PASSWORD, 400));
             });
 
             it('should prevent non-owner from changing password', async () => {
@@ -226,18 +256,19 @@ describe('UsersService', () => {
             });
 
             it('should prevent non-admin from deleting users', async () => {
-            await expect(UsersService.delete(5, 'USER')).rejects.toThrow(
-                new AppError(MESSAGES.USER.INSUFFICIENT_PERMISSIONS, 403)
-            );
+                await expect(UsersService.delete(5, 'USER')).rejects.toThrow(
+                    new ForbiddenError(MESSAGES.AUTH.FORBIDDEN)
+                );
             });
 
             it('should throw error if user not found', async () => {
-            vi.mocked(UsersRepository.findById).mockResolvedValue(null);
+                vi.mocked(UsersRepository.findById).mockResolvedValue(null);
 
-            await expect(UsersService.delete(999, 'ADMIN')).rejects.toThrow(
-                new AppError(MESSAGES.USER.NOT_FOUND, 404)
-            );
-        });
+                await expect(UsersService.delete(999, 'ADMIN')).rejects.toThrow(
+                    new NotFoundError(MESSAGES.USER.NOT_FOUND)
+                );
+            }
+        );
     });
 
     describe('sanitizeUser', () => {

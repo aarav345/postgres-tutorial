@@ -25,6 +25,8 @@ export const MESSAGES = {
     CANNOT_CHANGE_ROLE: 'Cannot change user role',
     INCORRECT_PASSWORD: 'Incorrect Current password',
     INSUFFICIENT_PERMISSIONS: 'Insufficient permissions',
+    PROFILE_FETCHED: 'Profile fetched successfully',
+    USERS_FETCHED: 'Users fetched successfully',
   },
   GENERAL: {
     SUCCESS: 'Operation successful',

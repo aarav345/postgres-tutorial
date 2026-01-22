@@ -37,7 +37,7 @@ export class UsersController {
           total: result.total,
           totalPages: Math.ceil(result.total / result.limit),
         },
-        'Users fetched successfully'
+        MESSAGES.USER.USERS_FETCHED
       );
     }
   );
@@ -51,7 +51,7 @@ export class UsersController {
       ResponseUtil.success(
         res,
         UsersService.sanitizeUser(user),
-        'User fetched successfully'
+        MESSAGES.USER.USERS_FETCHED
       );
     }
   );
@@ -64,7 +64,7 @@ export class UsersController {
       ResponseUtil.success(
         res,
         UsersService.sanitizeUser(user),
-        'Profile fetched successfully'
+        MESSAGES.USER.PROFILE_FETCHED
       );
     }
   );
@@ -135,7 +135,7 @@ export class UsersController {
       ResponseUtil.success(
         res,
         UsersService.sanitizeUser(user),
-        'User fetched successfully'
+        MESSAGES.USER.USERS_FETCHED
       );
     }
   );

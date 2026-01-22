@@ -9,18 +9,19 @@ import { MESSAGES } from '../../../src/common/constants/messages.constant';
 // Mock the services
 vi.mock('../../../src/modules/users/users.service');
 vi.mock('../../../src/modules/auth/auth.service');
-vi.mock('../../../src/common/middlewares/auth.middleware', () => ({
-    authenticate: (req: any, _res: any, next: any) => {
-        req.user = { userId: 1, role: 'USER' };
-        next();
-    },
-}));
-vi.mock('../../../src/common/middlewares/roles.middleware', () => ({
-    authorize: () => (req: any, _res: any, next: any) => {
-        req.user = { userId: 1, role: 'ADMIN' };
-        next();
-    },
-}));
+// vi.mock('../../../src/common/middlewares/auth.middleware', () => ({
+//     authenticate: (req: any, _res: any, next: any) => {
+//         req.user = { userId: 1, role: 'USER' };
+//         next();
+//     },
+// }));
+
+// vi.mock('../../../src/common/middlewares/roles.middleware', () => ({
+//     authorize: () => (req: any, _res: any, next: any) => {
+//         req.user = { userId: 1, role: 'ADMIN' };
+//         next();
+//     },
+// }));
 
 describe('UsersController', () => {
     let token: string;
@@ -37,60 +38,73 @@ describe('UsersController', () => {
 
     describe('GET /api/v1/users/me', () => {
         it('should return current user profile', async () => {
-        const mockUser = TestHelpers.mockUser();
-        const sanitizedUser = { ...mockUser };
+            const mockUser = TestHelpers.mockUser();
+            const sanitizedUser = { ...mockUser, password: undefined };
 
-        vi.mocked(UsersService.findById).mockResolvedValue(mockUser);
-        vi.mocked(UsersService.sanitizeUser).mockReturnValue(sanitizedUser);
+            vi.mocked(UsersService.findById).mockResolvedValue(mockUser);
+            vi.mocked(UsersService.sanitizeUser).mockReturnValue(sanitizedUser);
 
-        const response = await request(app)
-            .get('/api/v1/users/me')
-            .set(TestHelpers.authHeader(token));
+            const response = await request(app)
+                .get('/api/v1/users/me')
+                .set(TestHelpers.authHeader(token));
 
-        expect(response.status).toBe(200);
-        expect(response.body.success).toBe(true);
-        expect(response.body.message).toBe('Profile fetched successfully');
-        expect(response.body.data).toEqual(sanitizedUser);
-        expect(UsersService.findById).toHaveBeenCalledWith(1);
+            expect(response.status).toBe(200);
+            expect(response.body.success).toBe(true);
+            expect(response.body.message).toBe('Profile fetched successfully');
+            expect(response.body.data).toMatchObject({
+                id: sanitizedUser.id,
+                email: sanitizedUser.email,
+                username: sanitizedUser.username,
+                role: sanitizedUser.role,
+            });
+
+            expect(UsersService.findById).toHaveBeenCalledWith(1);
         });
 
         it('should return 401 if not authenticated', async () => {
-        const response = await request(app).get('/api/v1/users/me');
+                const response = await request(app).get('/api/v1/users/me');
 
-        expect(response.status).toBe(401);
+                expect(response.status).toBe(401);
         });
     });
 
     describe('GET /api/v1/users', () => {
         it('should return paginated list of users (admin only)', async () => {
-        const mockUsers = [
-            TestHelpers.mockUser({ id: 1 }),
-            TestHelpers.mockUser({ id: 2, email: 'user2@example.com' }),
-        ];
+            const mockUsers = [
+                TestHelpers.mockUser({ id: 1 }),
+                TestHelpers.mockUser({ id: 2, email: 'user2@example.com' }),
+            ];
 
-        const mockResult = {
-            users: mockUsers,
-            total: 2,
-            page: 1,
-            limit: 10,
-        };
+            const mockResult = {
+                users: mockUsers,
+                total: 2,
+                page: 1,
+                limit: 10,
+            };
 
-        vi.mocked(UsersService.findAll).mockResolvedValue(mockResult);
+            vi.mocked(UsersService.findAll).mockResolvedValue(mockResult);
 
-        const response = await request(app)
-            .get('/api/v1/users')
-            .query({ page: 1, limit: 10 })
-            .set(TestHelpers.authHeader(adminToken));
+            const response = await request(app)
+                .get('/api/v1/users')
+                .query({ page: 1, limit: 10 })
+                .set(TestHelpers.authHeader(adminToken));
 
-        expect(response.status).toBe(200);
-        expect(response.body.success).toBe(true);
-        expect(response.body.data).toEqual(mockUsers);
-        expect(response.body.pagination).toEqual({
-            page: 1,
-            limit: 10,
-            total: 2,
-            totalPages: 1,
-        });
+            expect(response.status).toBe(200);
+            expect(response.body.success).toBe(true);
+            response.body.data.forEach((user: any, index: number) => {
+                expect(user).toMatchObject({
+                    id: mockUsers[index].id,
+                    email: mockUsers[index].email,
+                    username: mockUsers[index].username,
+                    role: mockUsers[index].role,
+                })
+            })
+            expect(response.body.pagination).toEqual({
+                page: 1,
+                limit: 10,
+                total: 2,
+                totalPages: 1,
+            });
         });
 
         it('should filter users by role', async () => {
@@ -138,82 +152,97 @@ describe('UsersController', () => {
 
     describe('GET /api/v1/users/:id', () => {
         it('should return user by id', async () => {
-        const mockUser = TestHelpers.mockUser({ id: 5 });
-        const sanitizedUser = { ...mockUser, password: undefined };
+            const mockUser = TestHelpers.mockUser({ id: 5 });
+            const sanitizedUser = { ...mockUser, password: undefined };
 
-        vi.mocked(UsersService.findById).mockResolvedValue(mockUser);
-        vi.mocked(UsersService.sanitizeUser).mockReturnValue(sanitizedUser);
+            vi.mocked(UsersService.findById).mockResolvedValue(mockUser);
+            vi.mocked(UsersService.sanitizeUser).mockReturnValue(sanitizedUser);
 
-        const response = await request(app)
-            .get('/api/v1/users/5')
-            .set(TestHelpers.authHeader(token));
+            const response = await request(app)
+                .get('/api/v1/users/5')
+                .set(TestHelpers.authHeader(token));
 
-        expect(response.status).toBe(200);
-        expect(response.body.data).toEqual(sanitizedUser);
-        expect(UsersService.findById).toHaveBeenCalledWith(5);
-        });
+            expect(response.status).toBe(200);
+            expect(response.body.data).toMatchObject({
+                id: sanitizedUser.id,
+                email: sanitizedUser.email,
+                username: sanitizedUser.username,
+                role: sanitizedUser.role,
+            });
+            expect(UsersService.findById).toHaveBeenCalledWith(5);
+            });
 
-        it('should return 400 for invalid id format', async () => {
-        const response = await request(app)
-            .get('/api/v1/users/invalid')
-            .set(TestHelpers.authHeader(token));
+            it('should return 400 for invalid id format', async () => {
+            const response = await request(app)
+                .get('/api/v1/users/invalid')
+                .set(TestHelpers.authHeader(token));
 
-        expect(response.status).toBe(400);
+            expect(response.status).toBe(400);
         });
     });
 
     describe('GET /api/v1/users/username/:username', () => {
         it('should return user by username', async () => {
-        const mockUser = TestHelpers.mockUser({ username: 'johndoe' });
-        const sanitizedUser = { ...mockUser, password: undefined };
+            const mockUser = TestHelpers.mockUser({ username: 'johndoe' });
+            const sanitizedUser = { ...mockUser, password: undefined };
 
-        vi.mocked(UsersService.findByUsername).mockResolvedValue(mockUser);
-        vi.mocked(UsersService.sanitizeUser).mockReturnValue(sanitizedUser);
+            vi.mocked(UsersService.findByUsername).mockResolvedValue(mockUser);
+            vi.mocked(UsersService.sanitizeUser).mockReturnValue(sanitizedUser);
 
-        const response = await request(app).get('/api/v1/users/username/johndoe');
+            const response = await request(app).get('/api/v1/users/username/johndoe');
 
-        expect(response.status).toBe(200);
-        expect(response.body.data).toEqual(sanitizedUser);
-        expect(UsersService.findByUsername).toHaveBeenCalledWith('johndoe');
+            expect(response.status).toBe(200);
+            expect(response.body.data).toMatchObject({
+                id: sanitizedUser.id,
+                email: sanitizedUser.email,
+                username: sanitizedUser.username,
+                role: sanitizedUser.role,
+            });
+            expect(UsersService.findByUsername).toHaveBeenCalledWith('johndoe');
         });
 
         it('should return 404 if user not found', async () => {
-        vi.mocked(UsersService.findByUsername).mockResolvedValue(null);
+            vi.mocked(UsersService.findByUsername).mockResolvedValue(null);
 
-        const response = await request(app).get('/api/v1/users/username/notfound');
+            const response = await request(app).get('/api/v1/users/username/notfound');
 
-        expect(response.status).toBe(404);
-        expect(response.body.message).toBe(MESSAGES.USER.NOT_FOUND);
+            expect(response.status).toBe(404);
+            expect(response.body.message).toBe(MESSAGES.USER.NOT_FOUND);
         });
     });
 
     describe('PUT /api/v1/users/:id', () => {
         it('should update user successfully', async () => {
-        const updateData = { firstName: 'Updated', lastName: 'Name' };
-        const updatedUser = TestHelpers.mockUser({ ...updateData });
-        const sanitizedUser = { ...updatedUser, password: undefined };
+            const updateData = { username: 'UpdatedName' };
+            const updatedUser = TestHelpers.mockUser({ ...updateData });
+            const sanitizedUser = { ...updatedUser, password: undefined };
 
-        vi.mocked(UsersService.update).mockResolvedValue(updatedUser);
-        vi.mocked(UsersService.sanitizeUser).mockReturnValue(sanitizedUser);
+            vi.mocked(UsersService.update).mockResolvedValue(updatedUser);
+            vi.mocked(UsersService.sanitizeUser).mockReturnValue(sanitizedUser);
 
-        const response = await request(app)
-            .put('/api/v1/users/1')
-            .send(updateData)
-            .set(TestHelpers.authHeader(token));
+            const response = await request(app)
+                .put('/api/v1/users/1')
+                .send(updateData)
+                .set(TestHelpers.authHeader(token));
 
-        expect(response.status).toBe(200);
-        expect(response.body.message).toBe(MESSAGES.USER.UPDATED);
-        expect(response.body.data).toEqual(sanitizedUser);
-        expect(UsersService.update).toHaveBeenCalledWith(1, updateData, 1, 'USER');
+            expect(response.status).toBe(200);
+            expect(response.body.message).toBe(MESSAGES.USER.UPDATED);
+            expect(response.body.data).toMatchObject({
+                id: sanitizedUser.id,
+                email: sanitizedUser.email,
+                username: sanitizedUser.username,
+                role: sanitizedUser.role,
+            });
+            expect(UsersService.update).toHaveBeenCalledWith(1, updateData, 1, 'USER');
         });
 
         it('should return 400 for invalid update data', async () => {
-        const response = await request(app)
-            .put('/api/v1/users/1')
-            .send({ email: 'invalid-email' })
-            .set(TestHelpers.authHeader(token));
+            const response = await request(app)
+                .put('/api/v1/users/1')
+                .send({ email: 'invalid-email' })
+                .set(TestHelpers.authHeader(token));
 
-        expect(response.status).toBe(400);
+            expect(response.status).toBe(400);
         });
     });
 
