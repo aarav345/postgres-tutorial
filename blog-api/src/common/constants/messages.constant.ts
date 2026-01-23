@@ -34,4 +34,14 @@ export const MESSAGES = {
     NOT_FOUND: 'Resource not found',
     VALIDATION_ERROR: 'Validation error',
   },
+    CATEGORY: {
+    CREATED: 'Category created successfully',
+    FETCHED: 'Categories fetched successfully',
+    UPDATED: 'Category updated successfully',
+    DELETED: 'Category deleted successfully',
+    NOT_FOUND: 'Category not found',
+    STATISTICS_FETCHED: 'Category statistics fetched successfully',
+    ALREADY_EXISTS: 'Category with this name or slug already exists',
+    HAS_POSTS: 'Cannot delete category with associated posts',
+  },
 };

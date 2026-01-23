@@ -1,17 +1,15 @@
 import type { Prisma } from '@/generated/prisma';
 
-export type UserListItem = Prisma.UserGetPayload<{
+export type CategoryListItem = Prisma.CategoryGetPayload<{
     select: {
         id: true;
-        email: true;
-        username: true;
-        role: true;
+        name: true;
+        slug: true;
+        description: true;
         createdAt: true;
-        updatedAt: true;
         _count: {
             select: {
                 posts: true;
-                comments: true;
             };
         };
     };

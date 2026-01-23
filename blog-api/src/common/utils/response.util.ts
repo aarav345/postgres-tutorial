@@ -37,16 +37,16 @@ export class ResponseUtil {
         message: string = 'Success'
     ) : void {
         res.status(200).json({
-        success: true,
-        message,
-        data,
-        pagination: {
-            page: pagination.page,
-            limit: pagination.limit,
-            total: pagination.total,
-            totalPages: Math.ceil(pagination.total / pagination.limit),
-        },
-        timestamp: new Date().toISOString(),
+            success: true,
+            message,
+            data,
+            pagination: {
+                page: pagination.page,
+                limit: pagination.limit,
+                total: pagination.total,
+                totalPages: Math.ceil(pagination.total / pagination.limit),
+            },
+            timestamp: new Date().toISOString(),
         });
     }
 }
