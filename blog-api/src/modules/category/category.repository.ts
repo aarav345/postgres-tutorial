@@ -171,7 +171,7 @@ export class CategoriesRepository {
             },
             orderBy: {
                 posts: {
-                _count: 'desc',
+                    _count: 'desc',
                 },
             },
         });

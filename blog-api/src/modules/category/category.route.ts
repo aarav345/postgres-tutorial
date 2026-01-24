@@ -32,30 +32,24 @@ router.get(
     CategoriesController.getCategoryBySlug
 );
 
-// Get category by ID
-router.get(
-    '/:id',
-    validateParams(CategoryIdSlugSchema),
-    CategoriesController.getCategoryById
-);
-
-// Protected routes (require authentication and admin role)
-router.use(authenticate);
-router.use(authorize(Role.ADMIN));
 
 // Create category (Admin only)
 router.post(
     '/',
+    authenticate,
+    authorize(Role.ADMIN),
     validate(CreateCategorySchema),
     CategoriesController.createCategory
 );
 
 // Get category statistics (Admin only)
-router.get('/statistics', CategoriesController.getCategoryStatistics);
+router.get('/statistics', authenticate, authorize(Role.ADMIN), CategoriesController.getCategoryStatistics);
 
 // Update category (Admin only)
 router.put(
     '/:id',
+    authenticate,
+    authorize(Role.ADMIN),
     validateParams(CategoryIdSlugSchema),
     validate(UpdateCategorySchema),
     CategoriesController.updateCategory
@@ -64,8 +58,18 @@ router.put(
 // Delete category (Admin only)
 router.delete(
     '/:id',
+    authenticate,
+    authorize(Role.ADMIN),
     validateParams(CategoryIdSlugSchema),
     CategoriesController.deleteCategory
+);
+
+
+// Get category by ID public route
+router.get(
+    '/:id',
+    validateParams(CategoryIdSlugSchema),
+    CategoriesController.getCategoryById
 );
 
 export default router;

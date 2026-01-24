@@ -1,82 +1,37 @@
-import { PrismaClient, Role } from '../src/generated/prisma';
-import * as bcrypt from 'bcrypt';
-
-const prisma = new PrismaClient();
+import 'dotenv/config';
+import prisma from '../src/database/prisma.client.js';
+import { Role } from '../src/generated/prisma/index.js';
+import { BcryptUtil } from '../src/common/utils/bcrypt.util.js';
 
 async function main() {
-  console.log('🌱 Seeding database...');
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminPassword = process.env.ADMIN_PASSWORD;
 
-  // Hash passwords
-  const adminPassword = await bcrypt.hash('Admin123', 10);
-  const userPassword = await bcrypt.hash('User123', 10);
+  if (!adminEmail || !adminPassword) {
+    throw new Error('ADMIN_EMAIL and ADMIN_PASSWORD must be set');
+  }
 
-  // Create admin user
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@example.com' },
-    update: {},
-    create: {
-      email: 'admin@example.com',
-      username: 'admin',
-      password: adminPassword,
+  const existingAdmin = await prisma.user.findUnique({
+    where: { email: adminEmail },
+  });
+
+  if (existingAdmin) {
+    console.log('ℹ️ Admin already exists, skipping seeding');
+    return;
+  }
+
+  const hashedPassword = await BcryptUtil.hash(adminPassword);
+
+  await prisma.user.create({
+    data: {
+      email: adminEmail,
+      password: hashedPassword,
       role: Role.ADMIN,
+      username: "admin"
     },
   });
 
-  // Create regular user
-  const user = await prisma.user.upsert({
-    where: { email: 'user@example.com' },
-    update: {},
-    create: {
-      email: 'user@example.com',
-      username: 'johndoe',
-      password: userPassword,
-      role: Role.USER,
-    },
-  });
-
-  // Create categories
-  const techCategory = await prisma.category.upsert({
-    where: { slug: 'technology' },
-    update: {},
-    create: {
-      name: 'Technology',
-      slug: 'technology',
-      description: 'Technology related posts',
-    },
-  });
-
-  const lifestyleCategory = await prisma.category.upsert({
-    where: { slug: 'lifestyle' },
-    update: {},
-    create: {
-      name: 'Lifestyle',
-      slug: 'lifestyle',
-      description: 'Lifestyle related posts',
-    },
-  });
-
-  // Create tags
-  const jsTag = await prisma.tag.upsert({
-    where: { slug: 'javascript' },
-    update: {},
-    create: {
-      name: 'JavaScript',
-      slug: 'javascript',
-    },
-  });
-
-  const tsTag = await prisma.tag.upsert({
-    where: { slug: 'typescript' },
-    update: {},
-    create: {
-      name: 'TypeScript',
-      slug: 'typescript',
-    },
-  });
-
-  console.log('✅ Seed completed');
-  console.log('📧 Admin:', { email: admin.email, password: 'Admin123' });
-  console.log('📧 User:', { email: user.email, password: 'User123' });
+  console.log('✅ Admin user created');
 }
 
 main()

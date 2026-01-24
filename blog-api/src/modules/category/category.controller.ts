@@ -31,7 +31,7 @@ export class CategoriesController {
             const result = await CategoriesService.findAll({
                 ...pagination,
                 search,
-                includePosts: includePosts === true,
+                includePosts: includePosts === "true",
             });
 
             ResponseUtil.paginated(
