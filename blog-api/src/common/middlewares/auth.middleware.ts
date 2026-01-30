@@ -11,16 +11,12 @@ export const authenticate = (
     try {
     const token = JwtUtil.extractTokenFromHeader(req.headers.authorization);
 
-    console.log("token:", token)
-
     if (!token) {
         ResponseUtil.error(res, 'Access token is required', 401);
         return;
     }
 
     const decoded = JwtUtil.verifyAccessToken(token);
-
-    console.log("decoded", decoded);
     
     // Attach user info to request
     req.user = {

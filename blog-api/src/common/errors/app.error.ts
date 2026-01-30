@@ -17,6 +17,12 @@ export class NotFoundError extends AppError {
   }
 }
 
+export class AlreadyExistsError extends AppError {
+  constructor(message: string = 'Already exists') {
+    super(message, 409);
+  }
+}
+
 export class ValidationError extends AppError {
   constructor(
     message: string = 'Validation error',

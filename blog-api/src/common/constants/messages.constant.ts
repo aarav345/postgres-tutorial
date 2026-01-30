@@ -34,7 +34,7 @@ export const MESSAGES = {
     NOT_FOUND: 'Resource not found',
     VALIDATION_ERROR: 'Validation error',
   },
-    CATEGORY: {
+  CATEGORY: {
     CREATED: 'Category created successfully',
     FETCHED: 'Categories fetched successfully',
     UPDATED: 'Category updated successfully',
@@ -43,5 +43,23 @@ export const MESSAGES = {
     STATISTICS_FETCHED: 'Category statistics fetched successfully',
     ALREADY_EXISTS: 'Category with this name or slug already exists',
     HAS_POSTS: 'Cannot delete category with associated posts',
+  },
+  POST: {
+    CREATED: 'Post created successfully',
+    FETCHED: 'Posts fetched successfully',
+    UPDATED: 'Post updated successfully',
+    DELETED: 'Post deleted successfully',
+    PUBLISHED: 'Post published successfully',
+    UNPUBLISHED: 'Post unpublished successfully',
+    FEATURED_TOGGLED: 'Post featured status toggled successfully',
+    NOT_FOUND: 'Post not found',
+    ALREADY_EXISTS: 'Post with this slug already exists',
+    NOT_AUTHORIZED_UPDATE: 'You are not authorized to update this post',
+    NOT_AUTHORIZED_DELETE: 'You are not authorized to delete this post',
+    NOT_AUTHORIZED_PUBLISH: 'You are not authorized to publish this post',
+    NOT_AUTHORIZED_UNPUBLISH: 'You are not authorized to unpublish this post',
+    POST_ALREADY_PUBLISHED: 'Post is already published',
+    POST_ALREADY_UNPUBLISHED: 'Post is already unpublished',
+    STATISTICS_FETCHED: 'Post statistics fetched successfully',
   },
 };
