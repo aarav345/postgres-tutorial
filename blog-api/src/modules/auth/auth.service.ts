@@ -1,12 +1,12 @@
 import { BcryptUtil } from '../../common/utils/bcrypt.util.js';
 import { MESSAGES } from '../../common/constants/messages.constant.js';
-import { UsersService } from '../users/users.service.js';
+import { UsersService } from '../user/users.service.js';
 import type { RegisterDto } from './dto/register.dto.js';
 import type { User } from '../../generated/prisma';
 import { AppError, UnauthorizedError } from '../../common/errors/app.error.js';
 import { JwtUtil } from '@/common/utils/jwt.util.js';
 import { RefreshTokenService } from './token.service.js';
-import type { AuthResponse } from './interfaces/auth-response.interface.js';
+import type { AuthResponse } from './interface/auth-response.interface.js';
 import prisma from '@/database/prisma.client.js';
 
 export class AuthService {

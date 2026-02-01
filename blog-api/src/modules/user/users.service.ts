@@ -7,7 +7,7 @@ import type { CreateUserDto } from './dto/create-user.dto';
 import type { UpdateUserDto } from './dto/update-user.dto';
 import type { QueryUserDto } from './dto/query-user.dto';
 import type { PaginationResult } from '../../common/types/pagination.interface';
-import type { FindAllResult } from '@/modules/users/interfaces/find-all-user.interface';
+import type { FindAllResult } from '@/modules/user/interface/find-all-user.interface';
 
 export class UsersService {
     async create(data: CreateUserDto): Promise<User> {

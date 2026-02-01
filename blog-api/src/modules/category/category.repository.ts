@@ -1,6 +1,6 @@
 import prisma from '@/database/prisma.client';
 import type { Category, Prisma } from '../../generated/prisma';
-import { type CategoryListItem } from './interfaces/category-list-item.interface';
+import { type CategoryListItem } from './interface/category-list-item.interface';
 
 export class CategoriesRepository {
     async create(data: Prisma.CategoryCreateInput): Promise<Category> {
