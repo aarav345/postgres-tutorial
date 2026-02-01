@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeAll, afterEach } from 'vitest';
 import request from 'supertest';
 import app from '../../../src/app';
-import UsersService from '../../../src/modules/users/users.service';
+import UsersService from '../../../src/modules/user/users.service';
 import AuthService from '../../../src/modules/auth/auth.service';
 import { TestHelpers } from '../../helpers/test-helpers';
 import { MESSAGES } from '../../../src/common/constants/messages.constant';

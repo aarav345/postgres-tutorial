@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import UsersService from '../../src/modules/users/users.service';
-import UsersRepository from '../../src/modules/users/users.repository';
+import UsersService from '../../src/modules/user/users.service';
+import UsersRepository from '../../src/modules/user/users.repository';
 import { BcryptUtil } from '../../src/common/utils/bcrypt.util';
 import { AppError } from '../../src/common/errors/app.error';
 import { TestHelpers } from '../helpers/test-helpers';

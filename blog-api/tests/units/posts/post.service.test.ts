@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { PostsService } from '../../../src/modules/posts/post.service';
-import PostsRepository from '../../../src/modules/posts/post.repository';
+import { PostsService } from '../../../src/modules/post/post.service';
+import PostsRepository from '../../../src/modules/post/post.repository';
 import { PostHelpers } from '../../helpers/posts-helpers';
 import { NotFoundError, AlreadyExistsError, AppError } from '../../../src/common/errors/app.error';
 import { MESSAGES } from '../../../src/common/constants/messages.constant';

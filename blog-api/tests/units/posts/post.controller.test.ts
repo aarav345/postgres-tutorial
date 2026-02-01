@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { PostsController } from '../../../src/modules/posts/post.controller';
-import PostsService from '../../../src/modules/posts/post.service';
+import { PostsController } from '../../../src/modules/post/post.controller';
+import PostsService from '../../../src/modules/post/post.service';
 import { PostHelpers } from '../../helpers/posts-helpers';
 import type { Response } from 'express';
 

@@ -55,6 +55,19 @@ export default [
     },
   },
 
+  // Disable unsafe rules for error handler middleware (handles Zod errors)
+  {
+    files: [
+      'src/common/middlewares/error-handler.middleware.ts',
+      'src/**/error-handler.middleware.ts',
+    ],
+    rules: {
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+    },
+  },
+
   // Disable unsafe rules for service files that use Prisma
   {
     files: [
