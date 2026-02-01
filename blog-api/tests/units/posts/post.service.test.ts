@@ -50,9 +50,10 @@ describe('PostsService', () => {
             const createDto = PostHelpers.mockCreatePostDto();
 
             vi.spyOn(PostsRepository, 'exists').mockResolvedValue(true);
+            const createSpy = vi.spyOn(PostsRepository, 'create');
 
             await expect(postsService.create(createDto, 1)).rejects.toThrow(new AlreadyExistsError(MESSAGES.POST.ALREADY_EXISTS));
-            expect(PostsRepository.create).not.toHaveBeenCalled();
+            expect(createSpy).not.toHaveBeenCalled();
         });
 
         it('should set publishedAt when published is true', async () => {

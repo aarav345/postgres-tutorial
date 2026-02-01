@@ -41,8 +41,13 @@ describe('UsersController', () => {
             const mockUser = TestHelpers.mockUser();
             const sanitizedUser = { ...mockUser, password: undefined };
 
-            vi.mocked(UsersService.findById).mockResolvedValue(mockUser);
-            vi.mocked(UsersService.sanitizeUser).mockReturnValue(sanitizedUser);
+            const findByIdSpy = vi
+                .spyOn(UsersService, 'findById')
+                .mockResolvedValue(mockUser);
+
+            const sanitizeSpy = vi
+                .spyOn(UsersService, 'sanitizeUser')
+                .mockReturnValue(sanitizedUser);
 
             const response = await request(app)
                 .get('/api/v1/users/me')
@@ -58,8 +63,10 @@ describe('UsersController', () => {
                 role: sanitizedUser.role,
             });
 
-            expect(UsersService.findById).toHaveBeenCalledWith(1);
+            expect(findByIdSpy).toHaveBeenCalledWith(1);
+            expect(sanitizeSpy).toHaveBeenCalledWith(mockUser);
         });
+
 
         it('should return 401 if not authenticated', async () => {
                 const response = await request(app).get('/api/v1/users/me');
@@ -82,7 +89,9 @@ describe('UsersController', () => {
                 limit: 10,
             };
 
-            vi.mocked(UsersService.findAll).mockResolvedValue(mockResult);
+            const findAllSpy = vi.spyOn(UsersService, 'findAll').mockResolvedValue(mockResult);
+
+            vi.mocked(findAllSpy).mockResolvedValue(mockResult);
 
             const response = await request(app)
                 .get('/api/v1/users')
@@ -108,45 +117,51 @@ describe('UsersController', () => {
         });
 
         it('should filter users by role', async () => {
-        const mockResult = {
-            users: [TestHelpers.mockAdmin()],
-            total: 1,
-            page: 1,
-            limit: 10,
-        };
+            const mockResult = {
+                users: [TestHelpers.mockAdmin()],
+                total: 1,
+                page: 1,
+                limit: 10,
+            };
 
-        vi.mocked(UsersService.findAll).mockResolvedValue(mockResult);
+            const findAllSpy = vi.spyOn(UsersService, 'findAll').mockResolvedValue(mockResult);
 
-        const response = await request(app)
-            .get('/api/v1/users')
-            .query({ role: 'ADMIN' })
-            .set(TestHelpers.authHeader(adminToken));
+            vi.mocked(findAllSpy).mockResolvedValue(mockResult);
 
-        expect(response.status).toBe(200);
-        expect(UsersService.findAll).toHaveBeenCalledWith(
-            expect.objectContaining({ role: 'ADMIN' })
-        );
+            const response = await request(app)
+                .get('/api/v1/users')
+                .query({ role: 'ADMIN' })
+                .set(TestHelpers.authHeader(adminToken));
+
+            expect(response.status).toBe(200);
+            expect(findAllSpy).toHaveBeenCalledWith(
+                expect.objectContaining({ role: 'ADMIN' })
+            );
         });
 
         it('should search users by term', async () => {
-        const mockResult = {
-            users: [TestHelpers.mockUser()],
-            total: 1,
-            page: 1,
-            limit: 10,
-        };
+            const mockResult = {
+                users: [TestHelpers.mockUser()],
+                total: 1,
+                page: 1,
+                limit: 10,
+            };
 
-        vi.mocked(UsersService.findAll).mockResolvedValue(mockResult);
+            const findAllSpy = vi
+                .spyOn(UsersService, 'findAll')
+                .mockResolvedValue(mockResult);
 
-        const response = await request(app)
-            .get('/api/v1/users')
-            .query({ search: 'test' })
-            .set(TestHelpers.authHeader(adminToken));
+            vi.mocked(findAllSpy).mockResolvedValue(mockResult);
 
-        expect(response.status).toBe(200);
-        expect(UsersService.findAll).toHaveBeenCalledWith(
-            expect.objectContaining({ search: 'test' })
-        );
+            const response = await request(app)
+                .get('/api/v1/users')
+                .query({ search: 'test' })
+                .set(TestHelpers.authHeader(adminToken));
+
+            expect(response.status).toBe(200);
+            expect(findAllSpy).toHaveBeenCalledWith(
+                expect.objectContaining({ search: 'test' })
+            );
         });
     });
 
@@ -155,8 +170,16 @@ describe('UsersController', () => {
             const mockUser = TestHelpers.mockUser({ id: 5 });
             const sanitizedUser = { ...mockUser, password: undefined };
 
-            vi.mocked(UsersService.findById).mockResolvedValue(mockUser);
-            vi.mocked(UsersService.sanitizeUser).mockReturnValue(sanitizedUser);
+            const findByIdSpy = vi
+                .spyOn(UsersService, 'findById')
+                .mockResolvedValue(mockUser);
+            
+            const sanitizedUserSpy = vi
+                .spyOn(UsersService, 'sanitizeUser')
+                .mockReturnValue(sanitizedUser); 
+
+            vi.mocked(findByIdSpy).mockResolvedValue(mockUser);
+            vi.mocked(sanitizedUserSpy).mockReturnValue(sanitizedUser);
 
             const response = await request(app)
                 .get('/api/v1/users/5')
@@ -169,7 +192,7 @@ describe('UsersController', () => {
                 username: sanitizedUser.username,
                 role: sanitizedUser.role,
             });
-            expect(UsersService.findById).toHaveBeenCalledWith(5);
+            expect(findByIdSpy).toHaveBeenCalledWith(5);
             });
 
             it('should return 400 for invalid id format', async () => {
@@ -186,8 +209,11 @@ describe('UsersController', () => {
             const mockUser = TestHelpers.mockUser({ username: 'johndoe' });
             const sanitizedUser = { ...mockUser, password: undefined };
 
-            vi.mocked(UsersService.findByUsername).mockResolvedValue(mockUser);
-            vi.mocked(UsersService.sanitizeUser).mockReturnValue(sanitizedUser);
+            const findByUsernameSpy = vi.spyOn(UsersService, 'findByUsername').mockResolvedValue(mockUser);
+            const sanitizedUserSpy = vi.spyOn(UsersService, 'sanitizeUser').mockReturnValue(sanitizedUser);
+
+            vi.mocked(findByUsernameSpy).mockResolvedValue(mockUser);
+            vi.mocked(sanitizedUserSpy).mockReturnValue(sanitizedUser);
 
             const response = await request(app).get('/api/v1/users/username/johndoe');
 
@@ -198,11 +224,13 @@ describe('UsersController', () => {
                 username: sanitizedUser.username,
                 role: sanitizedUser.role,
             });
-            expect(UsersService.findByUsername).toHaveBeenCalledWith('johndoe');
+            expect(findByUsernameSpy).toHaveBeenCalledWith('johndoe');
         });
 
         it('should return 404 if user not found', async () => {
-            vi.mocked(UsersService.findByUsername).mockResolvedValue(null);
+
+            const findByUsernameSpy = vi.spyOn(UsersService, 'findByUsername').mockResolvedValue(null);
+            vi.mocked(findByUsernameSpy).mockResolvedValue(null);
 
             const response = await request(app).get('/api/v1/users/username/notfound');
 
@@ -217,8 +245,11 @@ describe('UsersController', () => {
             const updatedUser = TestHelpers.mockUser({ ...updateData });
             const sanitizedUser = { ...updatedUser, password: undefined };
 
-            vi.mocked(UsersService.update).mockResolvedValue(updatedUser);
-            vi.mocked(UsersService.sanitizeUser).mockReturnValue(sanitizedUser);
+            const updateSpy = vi.spyOn(UsersService, 'update').mockResolvedValue(updatedUser);
+            const sanitizedUserSpy = vi.spyOn(UsersService, 'sanitizeUser').mockReturnValue(sanitizedUser);
+
+            vi.mocked(updateSpy).mockResolvedValue(updatedUser);
+            vi.mocked(sanitizedUserSpy).mockReturnValue(sanitizedUser);
 
             const response = await request(app)
                 .put('/api/v1/users/1')
@@ -233,7 +264,7 @@ describe('UsersController', () => {
                 username: sanitizedUser.username,
                 role: sanitizedUser.role,
             });
-            expect(UsersService.update).toHaveBeenCalledWith(1, updateData, 1, 'USER');
+            expect(updateSpy).toHaveBeenCalledWith(1, updateData, 1, 'USER');
         });
 
         it('should return 400 for invalid update data', async () => {
@@ -254,9 +285,12 @@ describe('UsersController', () => {
                 newPassword: 'newPass123',
                 confirmPassword: 'newPass123',
             };
+            
+            const changePasswordSpy = vi.spyOn(UsersService, 'changePassword').mockResolvedValue(mockUser);
+            const logoutAllSpy = vi.spyOn(AuthService, 'logoutAll').mockResolvedValue(undefined);
 
-            vi.mocked(UsersService.changePassword).mockResolvedValue(mockUser);
-            vi.mocked(AuthService.logoutAll).mockResolvedValue(undefined);
+            vi.mocked(changePasswordSpy).mockResolvedValue(mockUser);
+            vi.mocked(logoutAllSpy).mockResolvedValue(undefined);
 
             const response = await request(app)
                 .put('/api/v1/users/1/password')
@@ -265,13 +299,13 @@ describe('UsersController', () => {
 
             expect(response.status).toBe(200);
             expect(response.body.message).toBe(MESSAGES.USER.PASSWORD_CHANGED);
-            expect(UsersService.changePassword).toHaveBeenCalledWith(
+            expect(changePasswordSpy).toHaveBeenCalledWith(
                 1,
                 'oldPass123',
                 'newPass123',
                 1
             );
-            expect(AuthService.logoutAll).toHaveBeenCalledWith(1);
+            expect(logoutAllSpy).toHaveBeenCalledWith(1);
         });
 
         it('should return 400 for weak password', async () => {
@@ -293,7 +327,9 @@ describe('UsersController', () => {
 
             const mockUser = TestHelpers.mockUser();
 
-            vi.mocked(UsersService.delete).mockResolvedValue(mockUser);
+            const deleteSpy = vi.spyOn(UsersService, 'delete').mockResolvedValue(mockUser);
+
+            vi.mocked(deleteSpy).mockResolvedValue(mockUser);
 
             const response = await request(app)
                 .delete('/api/v1/users/5')

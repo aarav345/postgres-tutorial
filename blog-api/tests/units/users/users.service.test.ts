@@ -19,16 +19,21 @@ describe('UsersService', () => {
     describe('findById', () => {
         it('should return user by id', async () => {
             const mockUser = TestHelpers.mockUser({ id: 1 });
-            vi.mocked(UsersRepository.findById).mockResolvedValue(mockUser);
+
+            const findByIdSpy = vi.spyOn(UsersRepository, 'findById').mockResolvedValue(mockUser);
+
+            vi.mocked(findByIdSpy).mockResolvedValue(mockUser);
 
             const result = await UsersService.findById(1);
 
             expect(result).toEqual(mockUser);
-            expect(UsersRepository.findById).toHaveBeenCalledWith(1);
+            expect(findByIdSpy).toHaveBeenCalledWith(1);
         });
 
         it('should throw error if user not found', async () => {
-            vi.mocked(UsersRepository.findById).mockResolvedValue(null);
+
+            const findByIdSpy = vi.spyOn(UsersRepository, 'findById').mockResolvedValue(null);
+            vi.mocked(findByIdSpy).mockResolvedValue(null);
 
             await expect(UsersService.findById(999)).rejects.toThrow(
                 new NotFoundError(MESSAGES.USER.NOT_FOUND)
@@ -39,16 +44,21 @@ describe('UsersService', () => {
     describe('findByUsername', () => {
         it('should return user by username', async () => {
             const mockUser = TestHelpers.mockUser({ username: 'testuser' });
-            vi.mocked(UsersRepository.findByUsername).mockResolvedValue(mockUser);
+
+            const findByUsernameSpy = vi.spyOn(UsersRepository, 'findByUsername').mockResolvedValue(mockUser);
+            vi.mocked(findByUsernameSpy).mockResolvedValue(mockUser);
 
             const result = await UsersService.findByUsername('testuser');
 
             expect(result).toEqual(mockUser);
-            expect(UsersRepository.findByUsername).toHaveBeenCalledWith('testuser');
+            expect(findByUsernameSpy).toHaveBeenCalledWith('testuser');
         });
 
         it('should return null if user not found', async () => {
-            vi.mocked(UsersRepository.findByUsername).mockResolvedValue(null);
+
+            const findByUsernameSpy = vi.spyOn(UsersRepository, 'findByUsername').mockResolvedValue(null);
+
+            vi.mocked(findByUsernameSpy).mockResolvedValue(null);
 
             const result = await UsersService.findByUsername('notfound');
 
@@ -60,8 +70,11 @@ describe('UsersService', () => {
         it('should return paginated users', async () => {
             const mockUsersWithCount = [ TestHelpers.mockUserWithCount({ id: 1, email: 'user1@example.com' }), TestHelpers.mockUserWithCount({ id: 2, email: 'user2@example.com' }) ];
 
-            vi.mocked(UsersRepository.findAll).mockResolvedValue(mockUsersWithCount);
-            vi.mocked(UsersRepository.count).mockResolvedValue(mockUsersWithCount.length);
+            const findAllSpy = vi.spyOn(UsersRepository, 'findAll').mockResolvedValue(mockUsersWithCount);
+            const countSpy = vi.spyOn(UsersRepository, 'count').mockResolvedValue(mockUsersWithCount.length);
+
+            vi.mocked(findAllSpy).mockResolvedValue(mockUsersWithCount);
+            vi.mocked(countSpy).mockResolvedValue(mockUsersWithCount.length);
 
 
             const result = await UsersService.findAll({
@@ -80,8 +93,11 @@ describe('UsersService', () => {
         it('should filter by role', async () => {
             const mockAdmins = [TestHelpers.mockAdminWithCount()];
 
-            vi.mocked(UsersRepository.findAll).mockResolvedValue(mockAdmins);
-            vi.mocked(UsersRepository.count).mockResolvedValue(mockAdmins.length);
+            const findAllSpy = vi.spyOn(UsersRepository, 'findAll').mockResolvedValue(mockAdmins);
+            const countSpy = vi.spyOn(UsersRepository, 'count').mockResolvedValue(mockAdmins.length);
+
+            vi.mocked(findAllSpy).mockResolvedValue(mockAdmins);
+            vi.mocked(countSpy).mockResolvedValue(mockAdmins.length);
 
             await UsersService.findAll({
                 skip: 0,
@@ -91,7 +107,7 @@ describe('UsersService', () => {
                 limit: 10,
             });
 
-            expect(UsersRepository.findAll).toHaveBeenCalledWith(
+            expect(findAllSpy).toHaveBeenCalledWith(
                 expect.objectContaining({
                     where: expect.objectContaining({
                         role: 'ADMIN'
@@ -106,7 +122,9 @@ describe('UsersService', () => {
         it('should search users', async () => {
             const mockUsers = [TestHelpers.mockUserWithCount({ username: 'searchtest' })];
 
-            vi.mocked(UsersRepository.findAll).mockResolvedValue(mockUsers);
+            const findAllSpy = vi.spyOn(UsersRepository, 'findAll').mockResolvedValue(mockUsers);
+
+            vi.mocked(findAllSpy).mockResolvedValue(mockUsers);
 
             await UsersService.findAll({
                 skip: 0,
@@ -116,7 +134,7 @@ describe('UsersService', () => {
                 limit: 10,
             });
 
-            expect(UsersRepository.findAll).toHaveBeenCalledWith(
+            expect(findAllSpy).toHaveBeenCalledWith(
                 expect.objectContaining({ 
                     where: expect.objectContaining({
                         OR: expect.arrayContaining([
@@ -143,28 +161,38 @@ describe('UsersService', () => {
             const updateData = { username: 'Updated' };
             const updatedUser = { ...mockUser, ...updateData };
 
-            vi.mocked(UsersRepository.findById).mockResolvedValue(mockUser);
-            vi.mocked(UsersRepository.update).mockResolvedValue(updatedUser);
+            const findByIdSpy = vi.spyOn(UsersRepository, 'findById').mockResolvedValue(mockUser);
+            const updateSpy = vi.spyOn(UsersRepository, 'update').mockResolvedValue(updatedUser);
+
+            vi.mocked(findByIdSpy).mockResolvedValue(mockUser);
+            vi.mocked(updateSpy).mockResolvedValue(updatedUser);
 
             const result = await UsersService.update(1, updateData, 1, 'USER');
 
             expect(result).toEqual(updatedUser);
-            expect(UsersRepository.update).toHaveBeenCalledWith(1, updateData);
+            expect(updateSpy).toHaveBeenCalledWith(1, updateData);
         });
 
         it('should allow admin to update any user', async () => {
             const mockUser = TestHelpers.mockUser({ id: 5 });
             const updateData = { username: 'AdminUpdated' };
 
-            vi.mocked(UsersRepository.findById).mockResolvedValue(mockUser);
-            vi.mocked(UsersRepository.update).mockResolvedValue({
+            const findByIdSpy = vi.spyOn(UsersRepository, 'findById').mockResolvedValue(mockUser);
+            const updateSpy = vi.spyOn(UsersRepository, 'update').mockResolvedValue({
+                ...mockUser,
+                ...updateData,
+            })
+
+
+            vi.mocked(findByIdSpy).mockResolvedValue(mockUser);
+            vi.mocked(updateSpy).mockResolvedValue({
                 ...mockUser,
                 ...updateData,
             });
 
             await UsersService.update(5, updateData, 1, 'ADMIN');
 
-            expect(UsersRepository.update).toHaveBeenCalled();
+            expect(updateSpy).toHaveBeenCalled();
         });
 
         it('should prevent non-admin from updating other users', async () => {
@@ -179,7 +207,9 @@ describe('UsersService', () => {
             const mockUser = TestHelpers.mockUser({ id: 1 });
             const updateData = { role: 'ADMIN' as Role, username: 'NonAdmin' };
 
-            vi.mocked(UsersRepository.findById).mockResolvedValue(mockUser);
+            const findByIdSpy = vi.spyOn(UsersRepository, 'findById').mockResolvedValue(mockUser);
+
+            vi.mocked(findByIdSpy).mockResolvedValue(mockUser);
 
             await expect(
                 UsersService.update(1, updateData, 1, 'USER')
@@ -194,10 +224,16 @@ describe('UsersService', () => {
                 password: 'hashed-old-password',
             };
 
-            vi.mocked(UsersRepository.findById).mockResolvedValue(mockUser);
+            const findByIdSpy = vi.spyOn(UsersRepository, 'findById').mockResolvedValue(mockUser);
+            const updateSpy = vi.spyOn(UsersRepository, 'update').mockResolvedValue({
+                ...mockUser,
+                password: 'hashed-new-password',
+            })
+
+            vi.mocked(findByIdSpy).mockResolvedValue(mockUser);
             vi.mocked(BcryptUtil.compare).mockResolvedValue(true);
             vi.mocked(BcryptUtil.hash).mockResolvedValue('hashed-new-password');
-            vi.mocked(UsersRepository.update).mockResolvedValue({
+            vi.mocked(updateSpy).mockResolvedValue({
                 ...mockUser,
                 password: 'hashed-new-password',
             });
@@ -211,7 +247,7 @@ describe('UsersService', () => {
             expect(BcryptUtil.hash).toHaveBeenCalledWith('newPassword');
 
             // Updated expectation to match the actual call
-            expect(UsersRepository.update).toHaveBeenCalledWith(
+            expect(updateSpy).toHaveBeenCalledWith(
                 1,
                 expect.objectContaining({
                     password: 'hashed-new-password',
@@ -228,7 +264,9 @@ describe('UsersService', () => {
                 password: 'hashed-password',
             };
 
-            vi.mocked(UsersRepository.findById).mockResolvedValue(mockUser);
+            const findByIdSpy = vi.spyOn(UsersRepository, 'findById').mockResolvedValue(mockUser);
+
+            vi.mocked(findByIdSpy).mockResolvedValue(mockUser);
             vi.mocked(BcryptUtil.compare).mockResolvedValue(false);
 
             await expect(
@@ -247,12 +285,15 @@ describe('UsersService', () => {
             it('should delete user (admin only)', async () => {
                 const mockUser = TestHelpers.mockUser({ id: 5, email: 'a@b.com' });
 
-                vi.mocked(UsersRepository.findById).mockResolvedValue(mockUser);
-                vi.mocked(UsersRepository.delete).mockResolvedValue(mockUser);
+                const findByIdSpy = vi.spyOn(UsersRepository, 'findById').mockResolvedValue(mockUser);
+                const deleteSpy = vi.spyOn(UsersRepository, 'delete').mockResolvedValue(mockUser);
+
+                vi.mocked(findByIdSpy).mockResolvedValue(mockUser);
+                vi.mocked(deleteSpy).mockResolvedValue(mockUser);
 
                 await UsersService.delete(5, 'ADMIN');
 
-                expect(UsersRepository.delete).toHaveBeenCalledWith(5);
+                expect(deleteSpy).toHaveBeenCalledWith(5);
             });
 
             it('should prevent non-admin from deleting users', async () => {
@@ -262,7 +303,9 @@ describe('UsersService', () => {
             });
 
             it('should throw error if user not found', async () => {
-                vi.mocked(UsersRepository.findById).mockResolvedValue(null);
+
+                const findByIdSpy = vi.spyOn(UsersRepository, 'findById').mockResolvedValue(null);
+                vi.mocked(findByIdSpy).mockResolvedValue(null);
 
                 await expect(UsersService.delete(999, 'ADMIN')).rejects.toThrow(
                     new NotFoundError(MESSAGES.USER.NOT_FOUND)
