@@ -21,6 +21,8 @@ router.get('/', (_req, res) => {
         endpoints: {
         auth: '/api/v1/auth',
         users: '/api/v1/users',
+        categories: '/api/v1/categories',
+        posts: '/api/v1/posts',
         },
     });
 });
